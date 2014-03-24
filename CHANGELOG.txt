@@ -1,0 +1,22 @@
+0.1.6 (October 7 2013)
+  - Can now sort an empty file without error
+
+0.1.5 (June 21 2013)
+  - Can specify directory where temporary files are stored from command line
+  - Can specify size of header from command line
+  - Added support for compressed temporary files
+
+0.1.4 (May 2nd 2013)
+  - ability to skip header
+  - ability to append the sorted result 
+
+0.1.3 (March 26th 2013)
+  - complete unit testing
+  - better memory usage prediction
+
+0.1.2 (omitted)
+
+0.1.1 (April 16th 2012)
+  - changed default in pom.xml file so that compilation is set to java 1.5
+  - being clearer about the license (public domain)
+  - allow programmer to set a custom temporary directory 
