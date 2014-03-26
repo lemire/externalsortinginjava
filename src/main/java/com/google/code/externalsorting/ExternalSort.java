@@ -14,7 +14,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
+//import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -461,7 +461,8 @@ public class ExternalSort {
         public static File sortAndSave(List<String> tmplist,
                 Comparator<String> cmp, Charset cs, File tmpdirectory,
                 boolean distinct, boolean usegzip) throws IOException {
-                Collections.sort(tmplist, cmp);
+                // Collections.sort(tmplist, cmp);
+				tmplist.parallelStream().sorted(cmp);
                 File newtmpfile = File.createTempFile("sortInBatch",
                         "flatfile", tmpdirectory);
                 newtmpfile.deleteOnExit();
