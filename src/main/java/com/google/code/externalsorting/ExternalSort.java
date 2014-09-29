@@ -461,7 +461,7 @@ public class ExternalSort {
         public static File sortAndSave(List<String> tmplist,
                 Comparator<String> cmp, Charset cs, File tmpdirectory,
                 boolean distinct, boolean usegzip) throws IOException {
-                Collections.sort(tmplist, cmp);
+                Collections.sort(tmplist, cmp);// In Java8, we can do tmplist = tmplist.parallelStream().sorted(cmp).collect(Collectors.toCollection(ArrayList<String>::new));
                 File newtmpfile = File.createTempFile("sortInBatch",
                         "flatfile", tmpdirectory);
                 newtmpfile.deleteOnExit();
