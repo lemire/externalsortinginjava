@@ -1,3 +1,6 @@
+Upcoming
+  - Duplicate lines are defined by provided comparator
+
 0.1.6 (October 7 2013)
   - Can now sort an empty file without error
 

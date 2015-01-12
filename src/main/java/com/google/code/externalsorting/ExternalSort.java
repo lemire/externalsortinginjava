@@ -15,6 +15,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -224,23 +225,49 @@ public class ExternalSort {
                         if (!bfb.empty())
                                 pq.add(bfb);
                 int rowcounter = 0;
-                String lastLine = null;
-                try {
-                        while (pq.size() > 0) {
-                                BinaryFileBuffer bfb = pq.poll();
-                                String r = bfb.pop();
-                                // Skip duplicate lines
-                                if (!distinct || !r.equals(lastLine)) {
-                                        fbw.write(r);
-                                        fbw.newLine();
-                                        lastLine = r;
-                                }
-                                ++rowcounter;
-                                if (bfb.empty()) {
-                                        bfb.fbr.close();
-                                } else {
-                                        pq.add(bfb); // add it back
-                                }
+                try {                        
+                        if(!distinct) {
+                            while (pq.size() > 0) {
+                                    BinaryFileBuffer bfb = pq.poll();
+                                    String r = bfb.pop();
+                                    fbw.write(r);
+                                    fbw.newLine();
+                                    ++rowcounter;
+                                    if (bfb.empty()) {
+                                            bfb.fbr.close();
+                                    } else {
+                                            pq.add(bfb); // add it back
+                                    }
+                            }
+                        } else {                                String lastLine = null;
+                            if(pq.size() > 0) {
+                     			BinaryFileBuffer bfb = pq.poll();
+                     			lastLine = bfb.pop();
+                     			fbw.write(lastLine);
+                     			fbw.newLine();
+                     			++rowcounter;
+                     			if (bfb.empty()) {
+                     				bfb.fbr.close();
+                     			} else {
+                     				pq.add(bfb); // add it back
+                     			}                			
+                     		}
+                            while (pq.size() > 0) {
+                    			BinaryFileBuffer bfb = pq.poll();
+                    			String r = bfb.pop();
+                    			// Skip duplicate lines
+                    			if  (cmp.compare(r, lastLine) != 0) {
+                    				fbw.write(r);
+                    				fbw.newLine();
+                    				lastLine = r;
+                    			}
+                    			++rowcounter;
+                    			if (bfb.empty()) {
+                    				bfb.fbr.close();
+                    			} else {
+                    				pq.add(bfb); // add it back
+                    			}
+                            }
                         }
                 } finally {
                         fbw.close();
@@ -475,15 +502,29 @@ public class ExternalSort {
                         };
                 BufferedWriter fbw = new BufferedWriter(new OutputStreamWriter(
                         out, cs));
-                String lastLine = null;
                 try {
-                        for (String r : tmplist) {
-                                // Skip duplicate lines
-                                if (!distinct || !r.equals(lastLine)) {
+                        if (!distinct) {
+                            for (String r : tmplist) {
                                         fbw.write(r);
                                         fbw.newLine();
-                                        lastLine = r;
-                                }
+                            }
+                        } else {
+                    		String lastLine = null;
+                    		Iterator<String> i = tmplist.iterator();
+                    		if(i.hasNext()) {
+                    			lastLine = i.next();
+                    			fbw.write(lastLine);
+                  				fbw.newLine();
+                    		}
+                    		while (i.hasNext()) {
+                    			String r = i.next();
+                    			// Skip duplicate lines
+                    			if (cmp.compare(r, lastLine) != 0) {
+                    				fbw.write(r);
+                    				fbw.newLine();
+                    				lastLine = r;
+                    			}
+                    		}
                         }
                 } finally {
                         fbw.close();
