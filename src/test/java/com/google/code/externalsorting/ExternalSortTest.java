@@ -306,6 +306,7 @@ public class ExternalSortTest {
         FileReader fr = new FileReader(this.csvFile);
         Scanner scan = new Scanner(fr);
         String head = scan.nextLine();
+        scan.close();
         
         // write to the file
         writeStringToFile(out, head+"\n");
@@ -330,6 +331,7 @@ public class ExternalSortTest {
 		while ((line = r.readLine()) != null) {
 			answer.add(line);
 		}
+		r.close();
 		return answer;
 	}
 
