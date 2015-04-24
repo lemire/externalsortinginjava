@@ -6,6 +6,7 @@ jdk:
   - openjdk7
   - openjdk6
 
+install: true
 
 branches:
   only:
