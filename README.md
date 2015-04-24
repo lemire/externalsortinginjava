@@ -1,5 +1,5 @@
 #externalsortinginjava
-
+[![Build Status](https://travis-ci.org/lemire/externalsortinginjava.png)](https://travis-ci.org/lemire/externalsortinginjava)
 
 External-Memory Sorting in Java
 
