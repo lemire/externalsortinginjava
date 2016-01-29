@@ -4,7 +4,7 @@ Externalsortinginjava
 [![][maven img]][maven]
 [![][license img]][license]
 [![docs-badge][]][docs]
-
+[![Coverage Status](https://coveralls.io/repos/github/lemire/externalsortinginjava/badge.svg?branch=master)](https://coveralls.io/github/lemire/externalsortinginjava?branch=master)
 
 External-Memory Sorting in Java: useful to sort very large files.
 
