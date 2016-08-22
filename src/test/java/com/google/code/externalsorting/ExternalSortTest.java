@@ -93,24 +93,34 @@ public class ExternalSortTest {
 
         FileChannel source = null;
         FileChannel destination = null;
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
 
         try {
-            source = new FileInputStream(sourceFile).getChannel();
-            destination = new FileOutputStream(destFile).getChannel();
+        	fis = new FileInputStream(sourceFile);
+            source = fis.getChannel();
+            fos = new FileOutputStream(destFile);
+            destination = fos.getChannel();
             destination.transferFrom(source, 0, source.size());
         }
         finally {
             if(source != null) {
                 source.close();
             }
+        	if(fis != null) {
+        		fis.close();
+        	}
             if(destination != null) {
                 destination.close();
             }
+        	if(fos != null) {
+        		fos.close();
+        	}
         }
     }
     @Test
-    public void displayTest() {
-        ExternalSort.displayUsage(); // check that it does not crash
+    public void displayTest()  throws Exception {
+        ExternalSort.main(new String[]{}); // check that it does not crash
     }
 
 
