@@ -9,12 +9,15 @@ Externalsortinginjava
 External-Memory Sorting in Java: useful to sort very large files.
 
 
+The versions 0.1 of the library are compatible with Java 6 and above. Versions 0.2 and above
+require at least Java 8. 
+
 Code sample
 ------------
 
 ```
                 import com.google.code.externalsorting.ExternalSort;
-                
+
                 //...
 
                 List<File> l = ExternalSort.sortInBatch(new File(inputfile));
@@ -51,7 +54,7 @@ You can also specify the dependency in the Maven "pom.xml" file:
 How to build
 -----------------
 
-- get the java jdk 
+- get the java jdk
 - Install Maven 2
 - mvn install - builds jar (requires signing)
 - mvn test - runs tests

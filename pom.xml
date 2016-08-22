@@ -12,8 +12,10 @@ Many database engines and the Unix sort command support external sorting. But wh
 
 When we could not find such a simple program, we wrote one.  </description>
 	<properties>
-           <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
- 	   <java.target.version>1.6</java.target.version>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <java.target.version>1.8</java.target.version>
+       <maven.compiler.source>1.8</maven.compiler.source>
+       <maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 	<issueManagement>
 		<system>GitHub Issue Tracking</system>

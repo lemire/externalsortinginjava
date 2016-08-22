@@ -247,7 +247,7 @@ public class ExternalSortTest {
             }
         };
         f = ExternalSort.sortAndSave(sample, cmp, Charset.defaultCharset(),
-                                     null, false, false);
+                                     null, false, false, true);
         assertNotNull(f);
         assertTrue(f.exists());
         assertTrue(f.length() > 0);
@@ -277,7 +277,7 @@ public class ExternalSortTest {
         };
 
         f = ExternalSort.sortAndSave(sample, cmp, Charset.defaultCharset(),
-                                     null, true, false);
+                                     null, true, false, true);
         assertNotNull(f);
         assertTrue(f.exists());
         assertTrue(f.length() > 0);
@@ -302,7 +302,7 @@ public class ExternalSortTest {
             }
         };
 
-        List<File> listOfFiles = ExternalSort.sortInBatch(this.csvFile, cmp, ExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1, false);
+        List<File> listOfFiles = ExternalSort.sortInBatch(this.csvFile, cmp, ExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1, false, true);
         assertEquals(1, listOfFiles.size());
 
         ArrayList<String> result = readLines(listOfFiles.get(0));
@@ -348,7 +348,7 @@ public class ExternalSortTest {
         writeStringToFile(out, head+"\n");
 
         // omit the first line, which is the header..
-        List<File> listOfFiles = ExternalSort.sortInBatch(this.csvFile, cmp, ExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1, usegzip);
+        List<File> listOfFiles = ExternalSort.sortInBatch(this.csvFile, cmp, ExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1, usegzip, true);
 
         // now merge with append
         ExternalSort.mergeSortedFiles(listOfFiles, out, cmp, Charset.defaultCharset(), false, true, usegzip);

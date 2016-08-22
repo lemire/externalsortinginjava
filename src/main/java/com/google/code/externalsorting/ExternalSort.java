@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -124,6 +125,7 @@ public class ExternalSort {
                 String inputfile = null, outputfile = null;
                 File tempFileStore = null;
                 boolean usegzip = false;
+                boolean parallel = true;
                 int headersize = 0;
                 for (int param = 0; param < args.length; ++param) {
                         if (args[param].equals("-v")
@@ -184,7 +186,7 @@ public class ExternalSort {
                 Comparator<String> comparator = defaultcomparator;
                 List<File> l = sortInBatch(new File(inputfile), comparator,
                         maxtmpfiles, cs, tempFileStore, distinct, headersize,
-                        usegzip);
+                        usegzip, parallel);
                 if (verbose)
                         System.out
                                 .println("created " + l.size() + " tmp files");
@@ -440,7 +442,7 @@ public class ExternalSort {
         public static File sortAndSave(List<String> tmplist,
                 Comparator<String> cmp, Charset cs, File tmpdirectory)
                 throws IOException {
-                return sortAndSave(tmplist, cmp, cs, tmpdirectory, false, false);
+                return sortAndSave(tmplist, cmp, cs, tmpdirectory, false, false, true);
         }
 
         /**
@@ -455,14 +457,19 @@ public class ExternalSort {
          *                default location)
          * @param distinct Pass <code>true</code> if duplicate lines should be
          *                discarded.
-         * @param usegzip set to true if you are using gzip compression for the
+         * @param usegzip set to <code>true</code> if you are using gzip compression for the
          *                temporary files
+         * @param parallel set to <code>true</code> when sorting in parallel
          * @throws IOException generic IO exception
          */
         public static File sortAndSave(List<String> tmplist,
                 Comparator<String> cmp, Charset cs, File tmpdirectory,
-                boolean distinct, boolean usegzip) throws IOException {
-                Collections.sort(tmplist, cmp);// In Java8, we can do tmplist = tmplist.parallelStream().sorted(cmp).collect(Collectors.toCollection(ArrayList<String>::new));
+                boolean distinct, boolean usegzip, boolean parallel) throws IOException {
+        	    if(parallel) {
+                  Collections.sort(tmplist, cmp);
+        	    } else {
+        	      tmplist = tmplist.parallelStream().sorted(cmp).collect(Collectors.toCollection(ArrayList<String>::new));	
+        	    }
                 File newtmpfile = File.createTempFile("sortInBatch",
                         "flatfile", tmpdirectory);
                 newtmpfile.deleteOnExit();
@@ -520,7 +527,7 @@ public class ExternalSort {
                 final long datalength) throws IOException {
                 return sortInBatch(fbr, datalength, defaultcomparator,
                         DEFAULTMAXTEMPFILES, estimateAvailableMemory(),
-                        Charset.defaultCharset(), null, false, 0, false);
+                        Charset.defaultCharset(), null, false, 0, false, true);
         }
 
         /**
@@ -541,7 +548,7 @@ public class ExternalSort {
                 final boolean distinct) throws IOException {
                 return sortInBatch(fbr, datalength, cmp, DEFAULTMAXTEMPFILES,
                         estimateAvailableMemory(), Charset.defaultCharset(),
-                        null, distinct, 0, false);
+                        null, distinct, 0, false, true);
         }
 
         /**
@@ -562,6 +569,7 @@ public class ExternalSort {
          *                discarded.
          * @param numHeader number of lines to preclude before sorting starts
          * @param usegzip use gzip compression for the temporary files
+         * @param parallel sort in parallel
          * @return a list of temporary flat files
          * @throws IOException generic IO exception
          */
@@ -569,7 +577,8 @@ public class ExternalSort {
                 final long datalength, final Comparator<String> cmp,
                 final int maxtmpfiles, long maxMemory, final Charset cs,
                 final File tmpdirectory, final boolean distinct,
-                final int numHeader, final boolean usegzip) throws IOException {
+                final int numHeader, final boolean usegzip, final boolean parallel) 
+                		throws IOException {
                 List<File> files = new ArrayList<File>();
                 long blocksize = estimateBestSizeOfBlocks(datalength,
                         maxtmpfiles, maxMemory);// in
@@ -595,13 +604,13 @@ public class ExternalSort {
                                                         .estimatedSizeOf(line);
                                         }
                                         files.add(sortAndSave(tmplist, cmp, cs,
-                                                tmpdirectory, distinct, usegzip));
+                                                tmpdirectory, distinct, usegzip, parallel));
                                         tmplist.clear();
                                 }
                         } catch (EOFException oef) {
                                 if (tmplist.size() > 0) {
                                         files.add(sortAndSave(tmplist, cmp, cs,
-                                                tmpdirectory, distinct, usegzip));
+                                                tmpdirectory, distinct, usegzip, parallel));
                                         tmplist.clear();
                                 }
                         }
@@ -682,7 +691,7 @@ public class ExternalSort {
                 int maxtmpfiles, Charset cs, File tmpdirectory, boolean distinct)
                 throws IOException {
                 return sortInBatch(file, cmp, maxtmpfiles, cs, tmpdirectory,
-                        distinct, 0, false);
+                        distinct, 0, false, true);
         }
 
         /**
@@ -702,18 +711,19 @@ public class ExternalSort {
          *                discarded.
          * @param numHeader number of lines to preclude before sorting starts
          * @param usegzip use gzip compression for the temporary files
+         * @param parallel whether to sort in parallel
          * @return a list of temporary flat files
          * @throws IOException generic IO exception
          */
         public static List<File> sortInBatch(File file, Comparator<String> cmp,
                 int maxtmpfiles, Charset cs, File tmpdirectory,
-                boolean distinct, int numHeader, boolean usegzip)
+                boolean distinct, int numHeader, boolean usegzip, boolean parallel)
                 throws IOException {
                 BufferedReader fbr = new BufferedReader(new InputStreamReader(
                         new FileInputStream(file), cs));
                 return sortInBatch(fbr, file.length(), cmp, maxtmpfiles,
                         estimateAvailableMemory(), cs, tmpdirectory, distinct,
-                        numHeader, usegzip);
+                        numHeader, usegzip, parallel);
         }
 
         /**
