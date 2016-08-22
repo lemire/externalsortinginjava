@@ -6,7 +6,7 @@ Externalsortinginjava
 [![docs-badge][]][docs]
 [![Coverage Status](https://coveralls.io/repos/github/lemire/externalsortinginjava/badge.svg?branch=master)](https://coveralls.io/github/lemire/externalsortinginjava?branch=master)
 
-External-Memory Sorting in Java: useful to sort very large files.
+External-Memory Sorting in Java: useful to sort very large files using multiple cores and an external-memory algorithm.
 
 
 The versions 0.1 of the library are compatible with Java 6 and above. Versions 0.2 and above
@@ -15,13 +15,14 @@ require at least Java 8.
 Code sample
 ------------
 
-```
-                import com.google.code.externalsorting.ExternalSort;
+```java
+import com.google.code.externalsorting.ExternalSort;
 
-                //...
-
-                List<File> l = ExternalSort.sortInBatch(new File(inputfile));
-                ExternalSort.mergeSortedFiles(l, new File(outputfile));
+//... inputfile: input file name
+//... outputfile: output file name
+// next command sorts the lines from inputfile to outputfile
+ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(new File(inputfile)), new File(outputfile));
+// you can also provide a custom string comparator, see API
 ```
 
 API Documentation
