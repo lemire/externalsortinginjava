@@ -77,9 +77,15 @@ public class ExternalSort {
          * 
          * @return available memory
          */
-        public static long estimateAvailableMemory() {
-                System.gc();
-                return Runtime.getRuntime().freeMemory();
+        public static long estimateAvailableMemory() 
+        {        	
+        	System.gc();
+
+        	Runtime r = Runtime.getRuntime();
+        	long allocatedMemory =  r.totalMemory() - r.freeMemory();
+			long presFreeMemory = r.maxMemory() - allocatedMemory;
+			
+        	return presFreeMemory;
         }
 
         /**
