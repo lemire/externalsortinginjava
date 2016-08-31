@@ -472,11 +472,11 @@ public class ExternalSort {
         public static File sortAndSave(List<String> tmplist,
                 Comparator<String> cmp, Charset cs, File tmpdirectory,
                 boolean distinct, boolean usegzip, boolean parallel) throws IOException {
-        	    if (parallel) {
+                if (parallel) {
+                  tmplist = tmplist.parallelStream().sorted(cmp).collect(Collectors.toCollection(ArrayList<String>::new));
+                } else {
                   Collections.sort(tmplist, cmp);
-        	    } else {
-        	      tmplist = tmplist.parallelStream().sorted(cmp).collect(Collectors.toCollection(ArrayList<String>::new));
-        	    }
+                }
                 File newtmpfile = File.createTempFile("sortInBatch",
                         "flatfile", tmpdirectory);
                 newtmpfile.deleteOnExit();
