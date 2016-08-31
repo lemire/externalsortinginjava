@@ -87,37 +87,19 @@ public class ExternalSortTest {
     }
 
     private static void copyFile(File sourceFile, File destFile) throws IOException {
-        if(!destFile.exists()) {
+        if (!destFile.exists()) {
             destFile.createNewFile();
         }
 
-        FileChannel source = null;
-        FileChannel destination = null;
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-
-        try {
-        	fis = new FileInputStream(sourceFile);
-            source = fis.getChannel();
-            fos = new FileOutputStream(destFile);
-            destination = fos.getChannel();
+        try (FileInputStream fis = new FileInputStream(sourceFile); 
+                FileChannel source = fis.getChannel(); 
+                FileOutputStream fos = new FileOutputStream(destFile); 
+                FileChannel destination = fos.getChannel()) {
             destination.transferFrom(source, 0, source.size());
-        }
-        finally {
-            if(source != null) {
-                source.close();
-            }
-        	if(fis != null) {
-        		fis.close();
-        	}
-            if(destination != null) {
-                destination.close();
-            }
-        	if(fos != null) {
-        		fos.close();
-        	}
-        }
+        }  
+    
     }
+    
     @Test
     public void displayTest()  throws Exception {
         ExternalSort.main(new String[]{}); // check that it does not crash
@@ -144,14 +126,13 @@ public class ExternalSortTest {
         f1.deleteOnExit();
         f2.deleteOnExit();
         ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(f1),f2);
-        if(f2.length() != 0) throw new RuntimeException("empty files should end up emtpy");
+        if (f2.length() != 0) throw new RuntimeException("empty files should end up emtpy");
     }
 
     @Test
     public void testMergeSortedFiles() throws Exception {
         String line;
-        List<String> result;
-        BufferedReader bf;
+        
         Comparator<String> cmp = new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -163,13 +144,12 @@ public class ExternalSortTest {
         ExternalSort.mergeSortedFiles(this.fileList, out, cmp,
                                       Charset.defaultCharset(), false);
 
-        bf = new BufferedReader(new FileReader(out));
-
-        result = new ArrayList<String>();
-        while ((line = bf.readLine()) != null) {
-            result.add(line);
+        List<String> result = new ArrayList<>();
+        try (BufferedReader bf = new BufferedReader(new FileReader(out))) {
+            while ((line = bf.readLine()) != null) {
+                result.add(line);
+            }
         }
-        bf.close();
         assertArrayEquals(Arrays.toString(result.toArray()), EXPECTED_MERGE_RESULTS,
                           result.toArray());
     }
@@ -177,8 +157,8 @@ public class ExternalSortTest {
     @Test
     public void testMergeSortedFiles_Distinct() throws Exception {
         String line;
-        List<String> result;
-        BufferedReader bf;
+        
+        
         Comparator<String> cmp = new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -189,14 +169,13 @@ public class ExternalSortTest {
         out.deleteOnExit();
         ExternalSort.mergeSortedFiles(this.fileList, out, cmp,
                                       Charset.defaultCharset(), true);
-
-        bf = new BufferedReader(new FileReader(out));
-
-        result = new ArrayList<String>();
-        while ((line = bf.readLine()) != null) {
-            result.add(line);
+        
+        List<String> result = new ArrayList<>();
+        try (BufferedReader bf = new BufferedReader(new FileReader(out))) {
+            while ((line = bf.readLine()) != null) {
+                result.add(line);
+            }
         }
-        bf.close();
         assertArrayEquals(Arrays.toString(result.toArray()), EXPECTED_MERGE_DISTINCT_RESULTS,
                           result.toArray());
     }
@@ -204,10 +183,8 @@ public class ExternalSortTest {
     @Test
     public void testMergeSortedFiles_Append() throws Exception {
         String line;
-        List<String> result;
-        BufferedReader bf;
-        Comparator<String> cmp = new Comparator<String>()
-        {
+        
+        Comparator<String> cmp = new Comparator<String>() {
             @Override
             public int compare(String o1, String o2)
             {
@@ -220,24 +197,20 @@ public class ExternalSortTest {
         writeStringToFile(out, "HEADER, HEADER\n");
 
         ExternalSort.mergeSortedFiles(this.fileList, out, cmp, Charset.defaultCharset(), true, true, false);
-
-        bf = new BufferedReader(new FileReader(out));
-
-        result = new ArrayList<String>();
-        while ((line = bf.readLine()) != null)
-        {
-            result.add(line);
+        
+        List<String> result = new ArrayList<>();
+        try (BufferedReader bf = new BufferedReader(new FileReader(out))) {
+            while ((line = bf.readLine()) != null) {
+                result.add(line);
+            }
         }
-        bf.close();
         assertArrayEquals(Arrays.toString(result.toArray()), EXPECTED_HEADER_RESULTS, result.toArray());
     }
 
     @Test
     public void testSortAndSave() throws Exception {
         File f;
-        String line;
-        List<String> result;
-        BufferedReader bf;
+        String line;      
 
         List<String> sample = Arrays.asList(SAMPLE);
         Comparator<String> cmp = new Comparator<String>() {
@@ -251,13 +224,12 @@ public class ExternalSortTest {
         assertNotNull(f);
         assertTrue(f.exists());
         assertTrue(f.length() > 0);
-        bf = new BufferedReader(new FileReader(f));
-
-        result = new ArrayList<String>();
-        while ((line = bf.readLine()) != null) {
-            result.add(line);
+        List<String> result = new ArrayList<>();
+        try (BufferedReader bf = new BufferedReader(new FileReader(f))) {
+            while ((line = bf.readLine()) != null) {
+                result.add(line);
+            }
         }
-        bf.close();
         assertArrayEquals(Arrays.toString(result.toArray()), EXPECTED_SORT_RESULTS,
                           result.toArray());
     }
@@ -266,7 +238,7 @@ public class ExternalSortTest {
     public void testSortAndSave_Distinct() throws Exception {
         File f;
         String line;
-        List<String> result;
+        
         BufferedReader bf;
         List<String> sample = Arrays.asList(SAMPLE);
         Comparator<String> cmp = new Comparator<String>() {
@@ -283,7 +255,7 @@ public class ExternalSortTest {
         assertTrue(f.length() > 0);
         bf = new BufferedReader(new FileReader(f));
 
-        result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         while ((line = bf.readLine()) != null) {
             result.add(line);
         }
@@ -296,8 +268,7 @@ public class ExternalSortTest {
     public void testSortInBatch() throws Exception {
         Comparator<String> cmp = new Comparator<String>() {
             @Override
-            public int compare(String o1, String o2)
-            {
+            public int compare(String o1, String o2) {
                 return o1.compareTo(o2);
             }
         };
@@ -338,12 +309,13 @@ public class ExternalSortTest {
             }
         };
 
-        // read header
-        FileReader fr = new FileReader(this.csvFile);
-        Scanner scan = new Scanner(fr);
-        String head = scan.nextLine();
-        scan.close();
-
+        String head;
+        try ( // read header
+                FileReader fr = new FileReader(this.csvFile)) {
+            try (Scanner scan = new Scanner(fr)) {
+                head = scan.nextLine();
+            }
+        }
         // write to the file
         writeStringToFile(out, head+"\n");
 
@@ -361,22 +333,20 @@ public class ExternalSortTest {
     }
 
     public static ArrayList<String> readLines(File f) throws IOException {
-        BufferedReader r = new BufferedReader(new FileReader(f));
-        ArrayList<String> answer = new ArrayList<String>();
-        String line;
-        while ((line = r.readLine()) != null) {
-            answer.add(line);
+        ArrayList<String> answer;
+        try (BufferedReader r = new BufferedReader(new FileReader(f))) {
+            answer = new ArrayList<>();
+            String line;
+            while ((line = r.readLine()) != null) {
+                answer.add(line);
+            }
         }
-        r.close();
         return answer;
     }
 
     public static void writeStringToFile(File f, String s) throws IOException {
-        FileOutputStream out = new FileOutputStream(f);
-        try {
+        try (FileOutputStream out = new FileOutputStream(f)) {
             out.write(s.getBytes());
-        } finally {
-            out.close();
         }
     }
 
