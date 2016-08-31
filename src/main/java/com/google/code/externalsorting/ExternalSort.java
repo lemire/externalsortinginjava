@@ -237,7 +237,8 @@ public class ExternalSort {
                                             pq.add(bfb); // add it back
                                     }
                             }
-                        } else {                            String lastLine = null;
+                        } else {
+                            String lastLine = null;
                             if(pq.size() > 0) {
                      			BinaryFileBuffer bfb = pq.poll();
                      			lastLine = bfb.pop();
@@ -630,9 +631,7 @@ public class ExternalSort {
          * @throws IOException generic IO exception
          */
         public static List<File> sortInBatch(File file) throws IOException {
-                return sortInBatch(file, defaultcomparator,
-                        DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null,
-                        false);
+                return sortInBatch(file, defaultcomparator);
         }
 
         /**
@@ -647,8 +646,7 @@ public class ExternalSort {
          */
         public static List<File> sortInBatch(File file, Comparator<String> cmp)
                 throws IOException {
-                return sortInBatch(file, cmp, DEFAULTMAXTEMPFILES,
-                        Charset.defaultCharset(), null, false);
+                return sortInBatch(file, cmp, false);
         }
 
         /**
@@ -677,6 +675,31 @@ public class ExternalSort {
          *
          * @param file some flat file
          * @param cmp string comparator
+         * @param tmpdirectory location of the temporary files (set to null for
+         *                default location)
+         * @param distinct Pass <code>true</code> if duplicate lines should be
+         *                discarded.
+         * @param numHeader number of lines to preclude before sorting starts
+         * @return a list of temporary flat files
+         * @throws IOException generic IO exception
+         */
+        public static List<File> sortInBatch(File file, Comparator<String> cmp,
+                File tmpdirectory,
+                boolean distinct, int numHeader)
+                throws IOException {
+                return sortInBatch(file, cmp, DEFAULTMAXTEMPFILES, 
+                        Charset.defaultCharset(), tmpdirectory, distinct,
+                        numHeader);
+        }
+        
+        /**
+         * This will simply load the file by blocks of lines, then sort them
+         * in-memory, and write the result to temporary files that have to be
+         * merged later. You can specify a bound on the number of temporary
+         * files that will be created.
+         *
+         * @param file some flat file
+         * @param cmp string comparator
          * @param maxtmpfiles maximal number of temporary files
          * @param cs  character set to use (can use
          *                Charset.defaultCharset())
@@ -691,9 +714,99 @@ public class ExternalSort {
                 int maxtmpfiles, Charset cs, File tmpdirectory, boolean distinct)
                 throws IOException {
                 return sortInBatch(file, cmp, maxtmpfiles, cs, tmpdirectory,
-                        distinct, 0, false, true);
+                        distinct, 0);
         }
-
+        
+                 /**
+         * This will simply load the file by blocks of lines, then sort them
+         * in-memory, and write the result to temporary files that have to be
+         * merged later. You can specify a bound on the number of temporary
+         * files that will be created.
+         *
+         * @param file some flat file
+         * @param cmp string comparator
+         * @param cs character set to use (can use
+         *                Charset.defaultCharset())
+         * @param tmpdirectory location of the temporary files (set to null for
+         *                default location)
+         * @param distinct Pass <code>true</code> if duplicate lines should be
+         *                discarded.
+         * @param numHeader number of lines to preclude before sorting starts
+         * @return a list of temporary flat files
+         * @throws IOException generic IO exception
+         */
+        public static List<File> sortInBatch(File file, Comparator<String> cmp,
+                Charset cs, File tmpdirectory,
+                boolean distinct, int numHeader)
+                throws IOException {
+                BufferedReader fbr = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(file), cs));
+                return sortInBatch(fbr, file.length(), cmp, DEFAULTMAXTEMPFILES,
+                        estimateAvailableMemory(), cs, tmpdirectory, distinct,
+                        numHeader, false, true);
+        }
+        
+         /**
+         * This will simply load the file by blocks of lines, then sort them
+         * in-memory, and write the result to temporary files that have to be
+         * merged later. You can specify a bound on the number of temporary
+         * files that will be created.
+         *
+         * @param file some flat file
+         * @param cmp string comparator
+         * @param maxtmpfiles maximal number of temporary files
+         * @param cs character set to use (can use
+         *                Charset.defaultCharset())
+         * @param tmpdirectory location of the temporary files (set to null for
+         *                default location)
+         * @param distinct Pass <code>true</code> if duplicate lines should be
+         *                discarded.
+         * @param numHeader number of lines to preclude before sorting starts
+         * @return a list of temporary flat files
+         * @throws IOException generic IO exception
+         */
+        public static List<File> sortInBatch(File file, Comparator<String> cmp,
+                int maxtmpfiles, Charset cs, File tmpdirectory,
+                boolean distinct, int numHeader)
+                throws IOException {
+                BufferedReader fbr = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(file), cs));
+                return sortInBatch(fbr, file.length(), cmp, maxtmpfiles,
+                        estimateAvailableMemory(), cs, tmpdirectory, distinct,
+                        numHeader, false, true);
+        }
+        
+        /**
+         * This will simply load the file by blocks of lines, then sort them
+         * in-memory, and write the result to temporary files that have to be
+         * merged later. You can specify a bound on the number of temporary
+         * files that will be created.
+         *
+         * @param file some flat file
+         * @param cmp string comparator
+         * @param maxtmpfiles maximal number of temporary files
+         * @param cs character set to use (can use
+         *                Charset.defaultCharset())
+         * @param tmpdirectory location of the temporary files (set to null for
+         *                default location)
+         * @param distinct Pass <code>true</code> if duplicate lines should be
+         *                discarded.
+         * @param numHeader number of lines to preclude before sorting starts
+         * @param usegzip use gzip compression for the temporary files
+         * @return a list of temporary flat files
+         * @throws IOException generic IO exception
+         */
+        public static List<File> sortInBatch(File file, Comparator<String> cmp,
+                int maxtmpfiles, Charset cs, File tmpdirectory,
+                boolean distinct, int numHeader, boolean usegzip)
+                throws IOException {
+                BufferedReader fbr = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(file), cs));
+                return sortInBatch(fbr, file.length(), cmp, maxtmpfiles,
+                        estimateAvailableMemory(), cs, tmpdirectory, distinct,
+                        numHeader, usegzip, true);
+        }
+        
         /**
          * This will simply load the file by blocks of lines, then sort them
          * in-memory, and write the result to temporary files that have to be
