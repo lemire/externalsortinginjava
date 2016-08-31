@@ -244,32 +244,32 @@ public class ExternalSort {
                         } else {
                             String lastLine = null;
                             if(pq.size() > 0) {
-                     			BinaryFileBuffer bfb = pq.poll();
-                     			lastLine = bfb.pop();
-                     			fbw.write(lastLine);
-                     			fbw.newLine();
-                     			++rowcounter;
-                     			if (bfb.empty()) {
-                     				bfb.fbr.close();
-                     			} else {
-                     				pq.add(bfb); // add it back
-                     			}
-                     		}
+                           BinaryFileBuffer bfb = pq.poll();
+                           lastLine = bfb.pop();
+                           fbw.write(lastLine);
+                           fbw.newLine();
+                           ++rowcounter;
+                           if (bfb.empty()) {
+                             bfb.fbr.close();
+                           } else {
+                             pq.add(bfb); // add it back
+                           }
+                         }
                             while (pq.size() > 0) {
-                    			BinaryFileBuffer bfb = pq.poll();
-                    			String r = bfb.pop();
-                    			// Skip duplicate lines
-                    			if  (cmp.compare(r, lastLine) != 0) {
-                    				fbw.write(r);
-                    				fbw.newLine();
-                    				lastLine = r;
-                    			}
-                    			++rowcounter;
-                    			if (bfb.empty()) {
-                    				bfb.fbr.close();
-                    			} else {
-                    				pq.add(bfb); // add it back
-                    			}
+                          BinaryFileBuffer bfb = pq.poll();
+                          String r = bfb.pop();
+                          // Skip duplicate lines
+                          if  (cmp.compare(r, lastLine) != 0) {
+                            fbw.write(r);
+                            fbw.newLine();
+                            lastLine = r;
+                          }
+                          ++rowcounter;
+                          if (bfb.empty()) {
+                            bfb.fbr.close();
+                          } else {
+                            pq.add(bfb); // add it back
+                          }
                             }
                         }
                 } finally {
@@ -497,22 +497,22 @@ public class ExternalSort {
                                         fbw.newLine();
                             }
                         } else {
-                    		String lastLine = null;
-                    		Iterator<String> i = tmplist.iterator();
-                    		if(i.hasNext()) {
-                    			lastLine = i.next();
-                    			fbw.write(lastLine);
-                  				fbw.newLine();
-                    		}
-                    		while (i.hasNext()) {
-                    			String r = i.next();
-                    			// Skip duplicate lines
-                    			if (cmp.compare(r, lastLine) != 0) {
-                    				fbw.write(r);
-                    				fbw.newLine();
-                    				lastLine = r;
-                    			}
-                    		}
+                        String lastLine = null;
+                        Iterator<String> i = tmplist.iterator();
+                        if(i.hasNext()) {
+                          lastLine = i.next();
+                          fbw.write(lastLine);
+                          fbw.newLine();
+                        }
+                        while (i.hasNext()) {
+                          String r = i.next();
+                          // Skip duplicate lines
+                          if (cmp.compare(r, lastLine) != 0) {
+                            fbw.write(r);
+                            fbw.newLine();
+                            lastLine = r;
+                          }
+                        }
                         }
                 }
                 return newtmpfile;
@@ -583,7 +583,7 @@ public class ExternalSort {
                 final int maxtmpfiles, long maxMemory, final Charset cs,
                 final File tmpdirectory, final boolean distinct,
                 final int numHeader, final boolean usegzip, final boolean parallel)
-                		throws IOException {
+                    throws IOException {
                 List<File> files = new ArrayList<>();
                 long blocksize = estimateBestSizeOfBlocks(datalength,
                         maxtmpfiles, maxMemory);// in
