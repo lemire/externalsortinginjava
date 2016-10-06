@@ -91,15 +91,52 @@ public class ExternalSortTest {
             destFile.createNewFile();
         }
 
-        try (FileInputStream fis = new FileInputStream(sourceFile); 
-                FileChannel source = fis.getChannel(); 
-                FileOutputStream fos = new FileOutputStream(destFile); 
+        try (FileInputStream fis = new FileInputStream(sourceFile);
+                FileChannel source = fis.getChannel();
+                FileOutputStream fos = new FileOutputStream(destFile);
                 FileChannel destination = fos.getChannel()) {
             destination.transferFrom(source, 0, source.size());
-        }  
-    
+        }
+
     }
-    
+
+    public static int estimateTotalSize(String[] mystrings) {
+      int total = 0;
+      for (String s : mystrings) {
+        total += StringSizeEstimator.estimatedSizeOf(s);
+      }
+      return total;
+    }
+
+    public static void oneRoundOfStringSizeEstimation() {
+      // could use JMH for better results but this should do
+      final int N = 1024;
+      String [] mystrings = new String[1024];
+      for(int k = 0; k < N ; ++k ) {
+        mystrings[k] = Integer.toString(k);
+      }
+      final int repeat = 1000;
+      long bef, aft, diff;
+      long bestdiff = Long.MAX_VALUE;
+      int bogus = 0;
+      for(int t = 0 ; t < repeat; ++t ) {
+        bef = System.nanoTime();
+        bogus += estimateTotalSize(mystrings);
+        aft = System.nanoTime();
+        diff = aft - bef;
+        if(diff < bestdiff) bestdiff = diff;
+      }
+      System.out.println("#ignore = "+bogus);
+      System.out.println("[performance] String size estimator uses "+bestdiff * 1.0 / N + " ns per string");
+    }
+
+    @Test
+    public void stringSizeEstimator() {
+      for(int k = 0; k < 10; ++k) {
+        oneRoundOfStringSizeEstimation();
+      }
+    }
+
     @Test
     public void displayTest()  throws Exception {
         ExternalSort.main(new String[]{}); // check that it does not crash
@@ -132,7 +169,7 @@ public class ExternalSortTest {
     @Test
     public void testMergeSortedFiles() throws Exception {
         String line;
-        
+
         Comparator<String> cmp = new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -157,8 +194,8 @@ public class ExternalSortTest {
     @Test
     public void testMergeSortedFiles_Distinct() throws Exception {
         String line;
-        
-        
+
+
         Comparator<String> cmp = new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -169,7 +206,7 @@ public class ExternalSortTest {
         out.deleteOnExit();
         ExternalSort.mergeSortedFiles(this.fileList, out, cmp,
                                       Charset.defaultCharset(), true);
-        
+
         List<String> result = new ArrayList<>();
         try (BufferedReader bf = new BufferedReader(new FileReader(out))) {
             while ((line = bf.readLine()) != null) {
@@ -183,7 +220,7 @@ public class ExternalSortTest {
     @Test
     public void testMergeSortedFiles_Append() throws Exception {
         String line;
-        
+
         Comparator<String> cmp = new Comparator<String>() {
             @Override
             public int compare(String o1, String o2)
@@ -197,7 +234,7 @@ public class ExternalSortTest {
         writeStringToFile(out, "HEADER, HEADER\n");
 
         ExternalSort.mergeSortedFiles(this.fileList, out, cmp, Charset.defaultCharset(), true, true, false);
-        
+
         List<String> result = new ArrayList<>();
         try (BufferedReader bf = new BufferedReader(new FileReader(out))) {
             while ((line = bf.readLine()) != null) {
@@ -210,7 +247,7 @@ public class ExternalSortTest {
     @Test
     public void testSortAndSave() throws Exception {
         File f;
-        String line;      
+        String line;
 
         List<String> sample = Arrays.asList(SAMPLE);
         Comparator<String> cmp = new Comparator<String>() {
@@ -238,7 +275,7 @@ public class ExternalSortTest {
     public void testSortAndSave_Distinct() throws Exception {
         File f;
         String line;
-        
+
         BufferedReader bf;
         List<String> sample = Arrays.asList(SAMPLE);
         Comparator<String> cmp = new Comparator<String>() {
