@@ -58,6 +58,16 @@ public final class StringSizeEstimator {
   /**
    * Estimates the size of a {@link String} object in bytes.
    *
+   * This function was designed with the following goals in mind (in order of importance) :
+   *
+   * First goal is speed: this function is called repeatedly and it should
+   * execute in not much more than a nanosecond.
+   *
+   * Second goal is to never underestimate (as it would lead to memory shortage and a crash).
+   *
+   * Third goal is to never overestimate too much (say within a factor of two), as it would
+   * mean that we are leaving much of the RAM underutilized.
+   *
    * @param s The string to estimate memory footprint.
    * @return The <strong>estimated</strong> size in bytes.
    */

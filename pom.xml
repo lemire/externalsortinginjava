@@ -41,6 +41,12 @@
                 <artifactId>junit</artifactId>
                 <version>4.12</version>
             </dependency>
+
+        <dependency>
+            <groupId>com.github.jbellis</groupId>
+            <artifactId>jamm</artifactId>
+            <version>0.3.1</version>
+        </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -49,9 +55,29 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.jbellis</groupId>
+            <artifactId>jamm</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
+
+            <plugin>
+              <artifactId>maven-dependency-plugin</artifactId>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -77,6 +103,20 @@
                 <configuration>
                     <source>${java.target.version}</source>
                     <target>${java.target.version}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Spec.*</include>
+                        <include>**/*Test.*</include>
+                        <include>**/*Benchmark.java</include>
+                    </includes>
+                    <argLine>-javaagent:${project.build.directory}/lib/jamm-0.3.1.jar</argLine>
                 </configuration>
             </plugin>
             <plugin>

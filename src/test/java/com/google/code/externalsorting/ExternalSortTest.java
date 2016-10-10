@@ -21,6 +21,7 @@ import java.util.Scanner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.github.jamm.*;
 
 /**
  * Unit test for simple App.
@@ -128,6 +129,25 @@ public class ExternalSortTest {
       }
       System.out.println("#ignore = "+bogus);
       System.out.println("[performance] String size estimator uses "+bestdiff * 1.0 / N + " ns per string");
+    }
+
+    /**
+    * This checks that the estimation is reasonably accurate.
+    */
+    @Test
+    public void stringSizeEstimatorQuality() {
+      MemoryMeter meter = new MemoryMeter().ignoreKnownSingletons().ignoreOuterClassReference().ignoreNonStrongReferences();
+      for(int k = 0; k < 100; ++k) {
+        String s = new String();
+        while(s.length() < k) s += "-";
+        long myestimate = StringSizeEstimator.estimatedSizeOf(s);
+        long jammestimate = meter.measureDeep(s);
+        System.out.println("String of size "+k+" estimates are us: "+myestimate+ " bytes jamm: "+jammestimate+" bytes");
+        assertTrue(jammestimate <= myestimate);
+        assertTrue(2 * jammestimate > myestimate);
+      }
+      System.out.println("All our string memory usage estimation are within a factor of two of jamm's and never lower.");
+
     }
 
     @Test
