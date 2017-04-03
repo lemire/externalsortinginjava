@@ -143,7 +143,7 @@ public class ExternalSort {
                                 && args.length > param + 1) {
                                 param++;
                                 maxtmpfiles = Integer.parseInt(args[param]);
-                                if (headersize < 0) {
+                                if (maxtmpfiles < 0) {
                                         System.err
                                                 .println("maxtmpfiles should be positive");
                                 }
