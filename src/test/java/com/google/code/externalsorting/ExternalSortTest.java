@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.github.jamm.*;
 
@@ -419,6 +420,7 @@ public class ExternalSortTest {
      *
      * @throws IOException
      */
+    @Ignore("This test takes too long to execute")
     @Test
     public void sortVeryLargeFile() throws IOException {
         final Path veryLargeFile = getTestFile();
