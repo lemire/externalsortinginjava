@@ -210,7 +210,7 @@ public class ExternalSort {
          * @throws IOException generic IO exception
          *
          */
-        public static int mergeSortedFiles(BufferedWriter fbw,
+        public static long mergeSortedFiles(BufferedWriter fbw,
                 final Comparator<String> cmp, boolean distinct,
                 List<BinaryFileBuffer> buffers) throws IOException {
                 PriorityQueue<BinaryFileBuffer> pq = new PriorityQueue<>(
@@ -226,7 +226,7 @@ public class ExternalSort {
                                 pq.add(bfb);
                         }
                 }
-                int rowcounter = 0;
+                long rowcounter = 0;
                 try {
                         if (!distinct) {
                             while (pq.size() > 0) {
@@ -290,7 +290,7 @@ public class ExternalSort {
          * @return The number of lines sorted.
          * @throws IOException generic IO exception
          */
-        public static int mergeSortedFiles(List<File> files, File outputfile)
+        public static long mergeSortedFiles(List<File> files, File outputfile)
                 throws IOException {
                 return mergeSortedFiles(files, outputfile, defaultcomparator,
                         Charset.defaultCharset());
@@ -306,7 +306,7 @@ public class ExternalSort {
          * @return The number of lines sorted.
          * @throws IOException generic IO exception
          */
-        public static int mergeSortedFiles(List<File> files, File outputfile,
+        public static long mergeSortedFiles(List<File> files, File outputfile,
                 final Comparator<String> cmp) throws IOException {
                 return mergeSortedFiles(files, outputfile, cmp,
                         Charset.defaultCharset());
@@ -324,7 +324,7 @@ public class ExternalSort {
          * @return The number of lines sorted.
          * @throws IOException generic IO exception
          */
-        public static int mergeSortedFiles(List<File> files, File outputfile,
+        public static long mergeSortedFiles(List<File> files, File outputfile,
                 final Comparator<String> cmp, boolean distinct)
                 throws IOException {
                 return mergeSortedFiles(files, outputfile, cmp,
@@ -343,7 +343,7 @@ public class ExternalSort {
          * @return The number of lines sorted.
          * @throws IOException generic IO exception
          */
-        public static int mergeSortedFiles(List<File> files, File outputfile,
+        public static long mergeSortedFiles(List<File> files, File outputfile,
                 final Comparator<String> cmp, Charset cs) throws IOException {
                 return mergeSortedFiles(files, outputfile, cmp, cs, false);
         }
@@ -363,7 +363,7 @@ public class ExternalSort {
          * @throws IOException generic IO exception
          * @since v0.1.2
          */
-        public static int mergeSortedFiles(List<File> files, File outputfile,
+        public static long mergeSortedFiles(List<File> files, File outputfile,
                 final Comparator<String> cmp, Charset cs, boolean distinct)
                 throws IOException {
                 return mergeSortedFiles(files, outputfile, cmp, cs, distinct,
@@ -389,7 +389,7 @@ public class ExternalSort {
          * @throws IOException generic IO exception
          * @since v0.1.4
          */
-        public static int mergeSortedFiles(List<File> files, File outputfile,
+        public static long mergeSortedFiles(List<File> files, File outputfile,
                 final Comparator<String> cmp, Charset cs, boolean distinct,
                 boolean append, boolean usegzip) throws IOException {
                 ArrayList<BinaryFileBuffer> bfbs = new ArrayList<>();
@@ -412,7 +412,7 @@ public class ExternalSort {
                 }
                 BufferedWriter fbw = new BufferedWriter(new OutputStreamWriter(
                         new FileOutputStream(outputfile, append), cs));
-                int rowcounter = mergeSortedFiles(fbw, cmp, distinct, bfbs);
+                long rowcounter = mergeSortedFiles(fbw, cmp, distinct, bfbs);
                 for (File f : files) {
                         f.delete();
                 }

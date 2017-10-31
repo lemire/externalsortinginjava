@@ -13,13 +13,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.github.jamm.*;
 
@@ -405,6 +413,49 @@ public class ExternalSortTest {
         try (FileOutputStream out = new FileOutputStream(f)) {
             out.write(s.getBytes());
         }
+    }
+
+    /**
+     * Sort a text file with lines greater than {@link Integer#MAX_VALUE}.
+     *
+     * @throws IOException
+     */
+    @Ignore("This test takes too long to execute")
+    @Test
+    public void sortVeryLargeFile() throws IOException {
+        final Path veryLargeFile = getTestFile();
+        final Path outputFile = Files.createTempFile("Merged-File", ".tmp");
+        final long sortedLines = ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(veryLargeFile.toFile()), outputFile.toFile());
+        final long expectedLines = 2148L * 1000000L;
+        assertEquals(expectedLines, sortedLines);
+    }
+
+    /**
+     * Generate a test file with 2148 million lines.
+     *
+     * @throws IOException
+     */
+    private Path getTestFile() throws IOException {
+        System.out.println("Temp File Creation: Started");
+        final Path path = Files.createTempFile("IntegrationTestFile", ".txt");
+        final List<String> idList = new ArrayList<>();
+        final int saneLimit = 1000000;
+        IntStream.range(0, saneLimit)
+                .forEach(i -> idList.add("A"));
+        final String content = idList.stream().collect(Collectors.joining("\n"));
+        Files.write(path, content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
+        final String newLine = "\n";
+        IntStream.range(1, 2148)
+                .forEach(i -> {
+                    try {
+                        Files.write(path, newLine.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                        Files.write(path, content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e.getMessage());
+                    }
+                });
+        System.out.println("Temp File Creation: Finished");
+        return path;
     }
 
 }
