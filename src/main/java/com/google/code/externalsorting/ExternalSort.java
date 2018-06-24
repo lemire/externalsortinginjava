@@ -435,6 +435,23 @@ public class ExternalSort {
         }
 
         /**
+         * This sorts a file (input) to an output file (output) using customized comparator
+         *
+         * @param input source file
+         *
+         * @param output output file
+         *
+         * @param cmp The {@link Comparator} to use to compare
+         *                {@link String}s.
+         * @throws IOException generic IO exception
+         */
+        public static void sort(final File input, final File output, final Comparator<String> cmp)
+                throws IOException {
+                ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(input),
+                        output, cmp);
+        }
+
+        /**
          * Sort a list and save it to a temporary file
          *
          * @return the file containing the sorted data
