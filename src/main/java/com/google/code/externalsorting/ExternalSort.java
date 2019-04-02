@@ -212,16 +212,16 @@ public class ExternalSort {
          */
         public static long mergeSortedFiles(BufferedWriter fbw,
                 final Comparator<String> cmp, boolean distinct,
-                List<BinaryFileBuffer> buffers) throws IOException {
-                PriorityQueue<BinaryFileBuffer> pq = new PriorityQueue<>(
-                        11, new Comparator<BinaryFileBuffer>() {
+                List<IOStringStack> buffers) throws IOException {
+                PriorityQueue<IOStringStack> pq = new PriorityQueue<>(
+                        11, new Comparator<IOStringStack>() {
                                 @Override
-                                public int compare(BinaryFileBuffer i,
-                                        BinaryFileBuffer j) {
+                                public int compare(IOStringStack i,
+                                IOStringStack j) {
                                         return cmp.compare(i.peek(), j.peek());
                                 }
                         });
-                for (BinaryFileBuffer bfb : buffers) {
+                for (IOStringStack bfb : buffers) {
                         if (!bfb.empty()) {
                                 pq.add(bfb);
                         }
@@ -230,13 +230,13 @@ public class ExternalSort {
                 try {
                         if (!distinct) {
                             while (pq.size() > 0) {
-                                    BinaryFileBuffer bfb = pq.poll();
+                                    IOStringStack bfb = pq.poll();
                                     String r = bfb.pop();
                                     fbw.write(r);
                                     fbw.newLine();
                                     ++rowcounter;
                                     if (bfb.empty()) {
-                                            bfb.fbr.close();
+                                            bfb.close();
                                     } else {
                                             pq.add(bfb); // add it back
                                     }
@@ -244,19 +244,19 @@ public class ExternalSort {
                         } else {
                             String lastLine = null;
                             if(pq.size() > 0) {
-                           BinaryFileBuffer bfb = pq.poll();
+                           IOStringStack bfb = pq.poll();
                            lastLine = bfb.pop();
                            fbw.write(lastLine);
                            fbw.newLine();
                            ++rowcounter;
                            if (bfb.empty()) {
-                             bfb.fbr.close();
+                             bfb.close();
                            } else {
                              pq.add(bfb); // add it back
                            }
                          }
                             while (pq.size() > 0) {
-                          BinaryFileBuffer bfb = pq.poll();
+                        IOStringStack bfb = pq.poll();
                           String r = bfb.pop();
                           // Skip duplicate lines
                           if  (cmp.compare(r, lastLine) != 0) {
@@ -266,7 +266,7 @@ public class ExternalSort {
                           }
                           ++rowcounter;
                           if (bfb.empty()) {
-                            bfb.fbr.close();
+                            bfb.close();
                           } else {
                             pq.add(bfb); // add it back
                           }
@@ -274,13 +274,14 @@ public class ExternalSort {
                         }
                 } finally {
                         fbw.close();
-                        for (BinaryFileBuffer bfb : pq) {
+                        for (IOStringStack bfb : pq) {
                                 bfb.close();
                         }
                 }
                 return rowcounter;
 
         }
+
 
         /**
          * This merges a bunch of temporary flat files
@@ -392,7 +393,7 @@ public class ExternalSort {
         public static long mergeSortedFiles(List<File> files, File outputfile,
                 final Comparator<String> cmp, Charset cs, boolean distinct,
                 boolean append, boolean usegzip) throws IOException {
-                ArrayList<BinaryFileBuffer> bfbs = new ArrayList<>();
+                ArrayList<IOStringStack> bfbs = new ArrayList<>();
                 for (File f : files) {
                         final int BUFFERSIZE = 2048;
                         InputStream in = new FileInputStream(f);

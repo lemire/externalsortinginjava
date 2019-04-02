@@ -8,7 +8,7 @@ import java.io.IOException;
  * the last line in memory.
  *
  */
-public final class BinaryFileBuffer {
+public final class BinaryFileBuffer implements IOStringStack {
     public BinaryFileBuffer(BufferedReader r) throws IOException {
         this.fbr = r;
         reload();
@@ -35,7 +35,7 @@ public final class BinaryFileBuffer {
         this.cache = this.fbr.readLine();
     }
 
-    public BufferedReader fbr;
+    private BufferedReader fbr;
 
     private String cache;
 
