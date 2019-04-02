@@ -447,7 +447,7 @@ public class ExternalSort {
          */
         public static void sort(final File input, final File output, final Comparator<String> cmp)
                 throws IOException {
-                ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(input),
+                ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(input, cmp),
                         output, cmp);
         }
 
