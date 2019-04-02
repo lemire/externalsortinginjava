@@ -431,9 +431,6 @@ public class ExternalSort {
          *                {@link String}s.
          * @param cs The {@link Charset} to be used for the byte to
          *                character conversion.
-         * @param append Pass <code>true</code> if result should append to
-         *                {@link File} instead of overwrite. Default to be false
-         *                for overloading methods.
          * @param usegzip assumes we used gzip compression for temporary files
          * @return The number of lines sorted.
          * @throws IOException generic IO exception
