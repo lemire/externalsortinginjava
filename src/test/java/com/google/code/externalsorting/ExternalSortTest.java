@@ -6,10 +6,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -20,8 +22,13 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -458,4 +465,39 @@ public class ExternalSortTest {
         return path;
     }
 
+    /**
+     * Sort with a custom comparator.
+     * @throws IOException
+     */
+    @Test
+    public void sortWithCustomComparator() throws IOException {
+        Random rand = new Random();
+        final Path path = Files.createTempFile("TestCsvWithLongIds", ".csv");
+        final Path pathSorted = Files.createTempFile("TestCsvWithLongIdsSorted", ".csv");
+        TreeSet<Long> sortedIds = new TreeSet<>();
+        try (FileWriter fw = new FileWriter(path.toFile());
+             BufferedWriter bw = new BufferedWriter(fw)) {
+            for (int i = 0; i < 1000; ++i) {
+                long nextLong = rand.nextLong();
+                sortedIds.add(nextLong);
+                bw.write(String.format("%d,%s\n", nextLong, UUID.randomUUID().toString()));
+            }
+        }
+        AtomicBoolean wasCalled = new AtomicBoolean(false);
+        ExternalSort.sort(path.toFile(), pathSorted.toFile(), (lhs, rhs) -> {
+            Long lhsLong = lhs.indexOf(',') == -1 ? Long.MAX_VALUE : Long.parseLong(lhs.split(",")[0]);
+            Long rhsLong = rhs.indexOf(',') == -1 ? Long.MAX_VALUE : Long.parseLong(rhs.split(",")[0]);
+            wasCalled.set(true);
+            return lhsLong.compareTo(rhsLong);
+        });
+        assertTrue("The custom comparator was not called!", wasCalled.get());
+        Iterator<Long> idIter = sortedIds.iterator();
+        try (FileReader fr = new FileReader(pathSorted.toFile());
+             BufferedReader bw = new BufferedReader(fr)) {
+            String nextLine = bw.readLine();
+            Long lhsLong = nextLine.indexOf(',') == -1 ? Long.MAX_VALUE : Long.parseLong(nextLine.split(",")[0]);
+            Long nextId = idIter.next();
+            assertEquals(lhsLong, nextId);
+        }
+    }
 }
