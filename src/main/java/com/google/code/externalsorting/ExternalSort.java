@@ -421,6 +421,53 @@ public class ExternalSort {
         }
 
         /**
+         * This merges a bunch of temporary flat files
+         *
+         * @param files The {@link List} of sorted {@link File}s to be merged.
+         * @param distinct Pass <code>true</code> if duplicate lines should be
+         *                discarded.
+         * @param fbw The output {@link BufferedWriter} to merge the results to.
+         * @param cmp The {@link Comparator} to use to compare
+         *                {@link String}s.
+         * @param cs The {@link Charset} to be used for the byte to
+         *                character conversion.
+         * @param append Pass <code>true</code> if result should append to
+         *                {@link File} instead of overwrite. Default to be false
+         *                for overloading methods.
+         * @param usegzip assumes we used gzip compression for temporary files
+         * @return The number of lines sorted.
+         * @throws IOException generic IO exception
+         * @since v0.1.4
+         */
+        public static long mergeSortedFiles(List<File> files, BufferedWriter fbw,
+                final Comparator<String> cmp, Charset cs, boolean distinct,
+                boolean usegzip) throws IOException {
+                ArrayList<IOStringStack> bfbs = new ArrayList<>();
+                for (File f : files) {
+                        final int BUFFERSIZE = 2048;
+                        InputStream in = new FileInputStream(f);
+                        BufferedReader br;
+                        if (usegzip) {
+                                br = new BufferedReader(
+                                        new InputStreamReader(
+                                                new GZIPInputStream(in,
+                                                        BUFFERSIZE), cs));
+                        } else {
+                                br = new BufferedReader(new InputStreamReader(
+                                        in, cs));
+                        }
+
+                        BinaryFileBuffer bfb = new BinaryFileBuffer(br);
+                        bfbs.add(bfb);
+                }
+                long rowcounter = mergeSortedFiles(fbw, cmp, distinct, bfbs);
+                for (File f : files) {
+                        f.delete();
+                }
+                return rowcounter;
+        }
+
+        /**
          * This sorts a file (input) to an output file (output) using default
          * parameters
          *
