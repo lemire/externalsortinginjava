@@ -165,7 +165,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+           <!-- Disabled due to  https://bugs.openjdk.java.net/browse/JDK-8212233
+             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.4</version>
@@ -178,7 +179,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
