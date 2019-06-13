@@ -12,7 +12,7 @@ External-Memory Sorting in Java: useful to sort very large files using multiple 
 The versions 0.1 of the library are compatible with Java 6 and above. Versions 0.2 and above
 require at least Java 8. 
 
-This code is used in [Apache Jackrabbit Oak](https://github.com/apache/jackrabbit-oak).
+This code is used in [Apache Jackrabbit Oak](https://github.com/apache/jackrabbit-oak) as well as in [Apache Beam](https://github.com/apache/beam).
 
 Code sample
 ------------
