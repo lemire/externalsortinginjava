@@ -4,15 +4,19 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -498,6 +502,46 @@ public class ExternalSortTest {
             Long lhsLong = nextLine.indexOf(',') == -1 ? Long.MAX_VALUE : Long.parseLong(nextLine.split(",")[0]);
             Long nextId = idIter.next();
             assertEquals(lhsLong, nextId);
+        }
+    }
+
+    @Test
+    public void lowMaxMemory() throws IOException {
+        String unsortedContent =
+                "Val1,Data2,Data3,Data4\r\n" +
+                "Val2,Data2,Data4,Data5\r\n" +
+                "Val1,Data2,Data3,Data5\r\n" +
+                "Val2,Data2,Data6,Data7\r\n";
+        ByteArrayInputStream bis = new ByteArrayInputStream(unsortedContent.getBytes(StandardCharsets.UTF_8));
+        File tmpDirectory = Files.createTempDirectory("sort").toFile();
+        tmpDirectory.deleteOnExit();
+
+        BufferedReader inputReader = new BufferedReader(new InputStreamReader(bis, StandardCharsets.UTF_8));
+        List<File> tmpSortedFiles = ExternalSort.sortInBatch(
+                inputReader,
+                unsortedContent.length(),
+                ExternalSort.defaultcomparator,
+                Integer.MAX_VALUE,  // use an unlimited number of temp files
+                100,                // max memory
+                StandardCharsets.UTF_8,
+                tmpDirectory,
+                false,              // no distinct
+                0,                  // no header lines to skip
+                false,              // don't use gzip
+                true);              // parallel
+        File tmpOutputFile = File.createTempFile("merged", "", tmpDirectory);
+        tmpOutputFile.deleteOnExit();
+        BufferedWriter outputWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream((tmpOutputFile))));
+        ExternalSort.mergeSortedFiles(
+                tmpSortedFiles,
+                outputWriter,
+                ExternalSort.defaultcomparator,
+                StandardCharsets.UTF_8,
+                false,              // no distinct
+                false);             // don't use gzip
+
+        for (File tmpSortedFile: tmpSortedFiles) {
+            assertFalse(tmpSortedFile.exists());
         }
     }
 }
