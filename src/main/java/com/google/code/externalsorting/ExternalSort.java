@@ -442,6 +442,9 @@ public class ExternalSort {
                 ArrayList<IOStringStack> bfbs = new ArrayList<>();
                 for (File f : files) {
                         final int BUFFERSIZE = 2048;
+                        if (f.length() == 0) {
+                                continue;
+                        }
                         InputStream in = new FileInputStream(f);
                         BufferedReader br;
                         if (usegzip) {
