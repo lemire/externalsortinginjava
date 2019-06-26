@@ -521,13 +521,13 @@ public class ExternalSortTest {
                 inputReader,
                 unsortedContent.length(),
                 ExternalSort.defaultcomparator,
-                Integer.MAX_VALUE,          // max number of temp files
-                100,             // max memory
+                Integer.MAX_VALUE,  // use an unlimited number of temp files
+                100,                // max memory
                 StandardCharsets.UTF_8,
                 tmpDirectory,
-                false,              // distinct
-                0,               // no header lines to skip, we already read it
-                false,              // usegzip
+                false,              // no distinct
+                0,                  // no header lines to skip
+                false,              // don't use gzip
                 true);              // parallel
         File tmpOutputFile = File.createTempFile("merged", "", tmpDirectory);
         tmpOutputFile.deleteOnExit();
@@ -537,8 +537,8 @@ public class ExternalSortTest {
                 outputWriter,
                 ExternalSort.defaultcomparator,
                 StandardCharsets.UTF_8,
-                false,              // distinct
-                false);             // usegzip
+                false,              // no distinct
+                false);             // don't use gzip
 
         for (File tmpSortedFile: tmpSortedFiles) {
             assertFalse(tmpSortedFile.exists());
