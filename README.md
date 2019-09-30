@@ -10,7 +10,7 @@ External-Memory Sorting in Java: useful to sort very large files using multiple 
 
 
 The versions 0.1 of the library are compatible with Java 6 and above. Versions 0.2 and above
-require at least Java 8. 
+require at least Java 8.
 
 This code is used in [Apache Jackrabbit Oak](https://github.com/apache/jackrabbit-oak) as well as in [Apache Beam](https://github.com/apache/beam).
 
@@ -25,6 +25,27 @@ import com.google.code.externalsorting.ExternalSort;
 // next command sorts the lines from inputfile to outputfile
 ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(new File(inputfile)), new File(outputfile));
 // you can also provide a custom string comparator, see API
+```
+
+
+Code sample (CSV)
+------------
+
+For sorting CSV files, it  might be more convenient to use `CsvExternalSort`.
+
+```java
+import com.google.code.externalsorting.CsvExternalSort;
+import org.apache.commons.csv.CSVRecord;
+
+
+// provide a comparator
+Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0).compareTo(op2.get(0));
+//... inputfile: input file name
+//... outputfile: output file name
+// next two lines sort the lines from inputfile to outputfile
+List<File> sortInBatch = CsvExternalSort.sortInBatch(inputfile, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1);
+CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, Charset.defaultCharset(), false, true);
+
 ```
 
 API Documentation
