@@ -42,11 +42,18 @@
                 <version>4.12</version>
             </dependency>
 
-        <dependency>
-            <groupId>com.github.jbellis</groupId>
-            <artifactId>jamm</artifactId>
-            <version>0.3.1</version>
-        </dependency>
+	        <dependency>
+	            <groupId>com.github.jbellis</groupId>
+	            <artifactId>jamm</artifactId>
+	            <version>0.3.1</version>
+	        </dependency>
+        
+			<dependency>
+			    <groupId>org.apache.commons</groupId>
+			    <artifactId>commons-csv</artifactId>
+			    <version>1.4</version>
+			</dependency>
+        
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -61,6 +68,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+        	<groupId>org.apache.commons</groupId>
+        	<artifactId>commons-csv</artifactId>
+        	<version>1.4</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
