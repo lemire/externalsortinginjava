@@ -61,7 +61,7 @@ Maven dependency
 
 
 You can download the jar files from the Maven central repository:
-http://repo1.maven.org/maven2/com/google/code/externalsortinginjava/externalsortinginjava/
+https://repo1.maven.org/maven2/com/google/code/externalsortinginjava/externalsortinginjava/
 
 You can also specify the dependency in the Maven "pom.xml" file:
 
