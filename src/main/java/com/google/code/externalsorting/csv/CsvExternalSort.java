@@ -1,15 +1,16 @@
 package com.google.code.externalsorting.csv;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +25,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-
 
 public class CsvExternalSort {
 
@@ -115,11 +115,12 @@ public class CsvExternalSort {
 		ArrayList<CSVRecordBuffer> bfbs = new ArrayList<CSVRecordBuffer>();
 		for (File f : files) {
 			InputStream in = new FileInputStream(f);
-			BufferedReader fbr = new BufferedReader(new InputStreamReader(in));
+			BufferedReader fbr = new BufferedReader(new InputStreamReader(in, cs));
 			CSVParser parser = new CSVParser(fbr, CSVFormat.DEFAULT);
 			CSVRecordBuffer bfb = new CSVRecordBuffer(parser);
 			bfbs.add(bfb);
 		}
+
 		BufferedWriter fbw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputfile, append), cs));
 
 		int rowcounter = mergeSortedFiles(fbw, cmp, distinct, bfbs);
@@ -128,12 +129,14 @@ public class CsvExternalSort {
 				LOG.log(Level.WARNING,String.format("The file %s was not deleted", f.getName()));
 			}
 		}
+
 		return rowcounter;
 	}
 
 	public static List<File> sortInBatch(final BufferedReader fbr, final long datalength,
 			final Comparator<CSVRecord> cmp, final int maxtmpfiles, long maxMemory, final Charset cs,
 			final File tmpdirectory, final boolean distinct, final int numHeader) throws IOException {
+
 		List<File> files = new ArrayList<File>();
 		long blocksize = estimateBestSizeOfBlocks(datalength, maxtmpfiles, maxMemory);// in
 		// bytes
@@ -168,13 +171,15 @@ public class CsvExternalSort {
 
 	public static File sortAndSave(List<CSVRecord> tmplist, Comparator<CSVRecord> cmp, Charset cs, File tmpdirectory,
 			boolean distinct) throws IOException {
+
 		Collections.sort(tmplist, cmp);
 		File newtmpfile = File.createTempFile("sortInBatch", "flatfile", tmpdirectory);
 		newtmpfile.deleteOnExit();
 
 		CSVRecord lastLine = null;
-		CSVPrinter printer = new CSVPrinter(new BufferedWriter(new FileWriter(newtmpfile)), CSVFormat.DEFAULT);
-		try {
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(newtmpfile), cs);
+			 CSVPrinter printer = new CSVPrinter(new BufferedWriter(writer), CSVFormat.DEFAULT);
+		){
 			for (CSVRecord r : tmplist) {
 				// Skip duplicate lines
 				if (distinct && checkDuplicateLine(r, lastLine)) {
@@ -183,9 +188,8 @@ public class CsvExternalSort {
 					lastLine = r;
 				}
 			}
-		} finally {
-			printer.close();
 		}
+
 		return newtmpfile;
 	}
 
