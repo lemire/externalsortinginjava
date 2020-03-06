@@ -69,7 +69,7 @@ public class CsvExternalSort {
 	}
 
 	public static int mergeSortedFiles(BufferedWriter fbw, final Comparator<CSVRecord> cmp, boolean distinct,
-			ArrayList<CSVRecordBuffer> bfbs) throws IOException, ClassNotFoundException {
+			ArrayList<CSVRecordBuffer> bfbs, CSVFormat format) throws IOException, ClassNotFoundException {
 		PriorityQueue<CSVRecordBuffer> pq = new PriorityQueue<CSVRecordBuffer>(11, new Comparator<CSVRecordBuffer>() {
 			@Override
 			public int compare(CSVRecordBuffer i, CSVRecordBuffer j) {
@@ -80,7 +80,7 @@ public class CsvExternalSort {
 			if (!bfb.empty())
 				pq.add(bfb);
 		int rowcounter = 0;
-		CSVPrinter printer = new CSVPrinter(fbw, CSVFormat.DEFAULT);
+		CSVPrinter printer = new CSVPrinter(fbw, format);
 		CSVRecord lastLine = null;
 		try {
 			while (pq.size() > 0) {
@@ -110,19 +110,19 @@ public class CsvExternalSort {
 	}
 
 	public static int mergeSortedFiles(List<File> files, File outputfile, final Comparator<CSVRecord> cmp, Charset cs,
-			boolean distinct, boolean append) throws IOException, ClassNotFoundException {
+			boolean distinct, boolean append, CSVFormat format) throws IOException, ClassNotFoundException {
 
 		ArrayList<CSVRecordBuffer> bfbs = new ArrayList<CSVRecordBuffer>();
 		for (File f : files) {
 			InputStream in = new FileInputStream(f);
 			BufferedReader fbr = new BufferedReader(new InputStreamReader(in));
-			CSVParser parser = new CSVParser(fbr, CSVFormat.DEFAULT);
+			CSVParser parser = new CSVParser(fbr, format);
 			CSVRecordBuffer bfb = new CSVRecordBuffer(parser);
 			bfbs.add(bfb);
 		}
 		BufferedWriter fbw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputfile, append), cs));
 
-		int rowcounter = mergeSortedFiles(fbw, cmp, distinct, bfbs);
+		int rowcounter = mergeSortedFiles(fbw, cmp, distinct, bfbs, format);
 		for (File f : files) {
 			if(!f.delete()) {
 				LOG.log(Level.WARNING,String.format("The file %s was not deleted", f.getName()));
@@ -133,13 +133,13 @@ public class CsvExternalSort {
 
 	public static List<File> sortInBatch(final BufferedReader fbr, final long datalength,
 			final Comparator<CSVRecord> cmp, final int maxtmpfiles, long maxMemory, final Charset cs,
-			final File tmpdirectory, final boolean distinct, final int numHeader) throws IOException {
+			final File tmpdirectory, final boolean distinct, final int numHeader, CSVFormat format) throws IOException {
 		List<File> files = new ArrayList<File>();
 		long blocksize = estimateBestSizeOfBlocks(datalength, maxtmpfiles, maxMemory);// in
 		// bytes
 		AtomicLong currentBlock = new AtomicLong(0);
 		List<CSVRecord> tmplist = new ArrayList<CSVRecord>();
-		try (CSVParser parser = new CSVParser(fbr, CSVFormat.DEFAULT)) {
+		try (CSVParser parser = new CSVParser(fbr, format)) {
 			parser.spliterator().forEachRemaining(e -> {
 				if (currentBlock.get() < blocksize) {
 					if (e.getRecordNumber() <= numHeader) {
@@ -149,7 +149,7 @@ public class CsvExternalSort {
 					}
 				} else {
 					try {
-						files.add(sortAndSave(tmplist, cmp, cs, tmpdirectory, distinct));
+						files.add(sortAndSave(tmplist, cmp, cs, tmpdirectory, distinct, format));
 					} catch (IOException e1) {
 						LOG.log(Level.WARNING,String.format("Error during the sort in batch"),e1);
 					}
@@ -160,20 +160,20 @@ public class CsvExternalSort {
 			});
 		}
 		if (!tmplist.isEmpty()) {
-			files.add(sortAndSave(tmplist, cmp, cs, tmpdirectory, distinct));
+			files.add(sortAndSave(tmplist, cmp, cs, tmpdirectory, distinct, format));
 		}
 
 		return files;
 	}
 
 	public static File sortAndSave(List<CSVRecord> tmplist, Comparator<CSVRecord> cmp, Charset cs, File tmpdirectory,
-			boolean distinct) throws IOException {
+			boolean distinct, CSVFormat format) throws IOException {
 		Collections.sort(tmplist, cmp);
 		File newtmpfile = File.createTempFile("sortInBatch", "flatfile", tmpdirectory);
 		newtmpfile.deleteOnExit();
 
 		CSVRecord lastLine = null;
-		CSVPrinter printer = new CSVPrinter(new BufferedWriter(new FileWriter(newtmpfile)), CSVFormat.DEFAULT);
+		CSVPrinter printer = new CSVPrinter(new BufferedWriter(new FileWriter(newtmpfile)), format);
 		try {
 			for (CSVRecord r : tmplist) {
 				// Skip duplicate lines
@@ -203,10 +203,10 @@ public class CsvExternalSort {
 	}
 
 	public static List<File> sortInBatch(File file, Comparator<CSVRecord> cmp, int maxtmpfiles, Charset cs,
-			File tmpdirectory, boolean distinct, int numHeader) throws IOException {
+			File tmpdirectory, boolean distinct, int numHeader, CSVFormat format) throws IOException {
 		try(BufferedReader fbr = new BufferedReader(new InputStreamReader(new FileInputStream(file), cs))){
 			return sortInBatch(fbr, file.length(), cmp, maxtmpfiles, estimateAvailableMemory(), cs, tmpdirectory, distinct,
-					numHeader);
+					numHeader, format);
 		}
 	}
 
