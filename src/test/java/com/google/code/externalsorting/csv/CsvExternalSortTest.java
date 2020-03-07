@@ -15,7 +15,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -75,11 +74,11 @@ public class CsvExternalSortTest {
 		Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
 				.compareTo(op2.get(0));
 
-		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, StandardCharsets.UTF_8, null, false, 1);
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, StandardCharsets.UTF_8, null, false, 1, CSVFormat.DEFAULT);
 
 		assertEquals(sortInBatch.size(), 1);
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, StandardCharsets.UTF_8, false, true);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, StandardCharsets.UTF_8, false, true, CSVFormat.DEFAULT);
 
 		assertEquals(mergeSortedFiles, 5);
 
