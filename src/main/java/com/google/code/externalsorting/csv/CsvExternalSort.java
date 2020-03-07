@@ -5,11 +5,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +24,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-
 
 public class CsvExternalSort {
 
@@ -115,7 +114,7 @@ public class CsvExternalSort {
 		ArrayList<CSVRecordBuffer> bfbs = new ArrayList<CSVRecordBuffer>();
 		for (File f : files) {
 			InputStream in = new FileInputStream(f);
-			BufferedReader fbr = new BufferedReader(new InputStreamReader(in));
+			BufferedReader fbr = new BufferedReader(new InputStreamReader(in, cs));
 			CSVParser parser = new CSVParser(fbr, format);
 			CSVRecordBuffer bfb = new CSVRecordBuffer(parser);
 			bfbs.add(bfb);
@@ -173,8 +172,9 @@ public class CsvExternalSort {
 		newtmpfile.deleteOnExit();
 
 		CSVRecord lastLine = null;
-		CSVPrinter printer = new CSVPrinter(new BufferedWriter(new FileWriter(newtmpfile)), format);
-		try {
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(newtmpfile), cs);
+			 CSVPrinter printer = new CSVPrinter(new BufferedWriter(writer), format);
+		){
 			for (CSVRecord r : tmplist) {
 				// Skip duplicate lines
 				if (distinct && checkDuplicateLine(r, lastLine)) {
@@ -183,9 +183,8 @@ public class CsvExternalSort {
 					lastLine = r;
 				}
 			}
-		} finally {
-			printer.close();
 		}
+
 		return newtmpfile;
 	}
 
