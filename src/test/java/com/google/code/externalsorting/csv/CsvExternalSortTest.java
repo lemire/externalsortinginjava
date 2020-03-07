@@ -1,6 +1,5 @@
 package com.google.code.externalsorting.csv;
 
-import javafx.util.Pair;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.After;
@@ -92,13 +91,13 @@ public class CsvExternalSortTest {
 
 	@Test
 	public void testCVSFormat() throws Exception {
-		Map<CSVFormat, Pair<String, String>> map = new HashMap<CSVFormat, Pair<String, String>>(){{
-			put(CSVFormat.MYSQL, new Pair<>(FILE_CSV_WITH_TABS, "6   \"this wont work in other systems\"   3"));
-			put(CSVFormat.EXCEL.withDelimiter(SEMICOLON), new Pair<>(FILE_CSV_WITH_SEMICOOLONS, "6;this wont work in other systems;3"));
+		Map<CSVFormat, Pair> map = new HashMap<CSVFormat, Pair>(){{
+			put(CSVFormat.MYSQL, new Pair(FILE_CSV_WITH_TABS, "6   \"this wont work in other systems\"   3"));
+			put(CSVFormat.EXCEL.withDelimiter(SEMICOLON), new Pair(FILE_CSV_WITH_SEMICOOLONS, "6;this wont work in other systems;3"));
 		}};
 
-		for (Map.Entry<CSVFormat, Pair<String, String>> format : map.entrySet()){
-			String path = this.getClass().getClassLoader().getResource(format.getValue().getKey()).getPath();
+		for (Map.Entry<CSVFormat, Pair> format : map.entrySet()){
+			String path = this.getClass().getClassLoader().getResource(format.getValue().getFileName()).getPath();
 
 			File file = new File(path);
 
@@ -117,7 +116,7 @@ public class CsvExternalSortTest {
 
 			List<String> lines = Files.readAllLines(outputfile.toPath());
 
-			assertEquals(format.getValue().getValue(), lines.get(0));
+			assertEquals(format.getValue().getExpected(), lines.get(0));
 		}
 	}
 
@@ -128,4 +127,29 @@ public class CsvExternalSortTest {
 		}
 	}
 
+	private class Pair {
+		private String fileName;
+		private String expected;
+
+		public Pair(String fileName, String expected) {
+			this.fileName = fileName;
+			this.expected = expected;
+		}
+
+		public String getFileName() {
+			return fileName;
+		}
+
+		public void setFileName(String fileName) {
+			this.fileName = fileName;
+		}
+
+		public String getExpected() {
+			return expected;
+		}
+
+		public void setExpected(String expected) {
+			this.expected = expected;
+		}
+	}
 }
