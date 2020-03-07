@@ -43,8 +43,8 @@ Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0).compareTo(op2.get(0)
 //... inputfile: input file name
 //... outputfile: output file name
 // next two lines sort the lines from inputfile to outputfile
-List<File> sortInBatch = CsvExternalSort.sortInBatch(inputfile, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1);
-CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, Charset.defaultCharset(), false, true);
+List<File> sortInBatch = CsvExternalSort.sortInBatch(inputfile, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1, CSVFormat.DEFAULT);
+CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, Charset.defaultCharset(), false, true, CSVFormat.DEFAULT);
 
 ```
 
