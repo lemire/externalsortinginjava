@@ -36,11 +36,18 @@ public class CsvExternalSortTest {
 		Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
 				.compareTo(op2.get(0));
 
-		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1);
+		CsvSortOptions sortOptions = new CsvSortOptions
+				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.charset(Charset.defaultCharset())
+				.distinct(false)
+				.numHeader(1)
+				.build();
+
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 		
 		assertEquals(sortInBatch.size(), 1);
 		
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, Charset.defaultCharset(), false, true);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 		
 		assertEquals(mergeSortedFiles, 4);
 		
@@ -66,11 +73,18 @@ public class CsvExternalSortTest {
 		Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
 				.compareTo(op2.get(0));
 
-		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, StandardCharsets.UTF_8, null, false, 1);
+		CsvSortOptions sortOptions = new CsvSortOptions
+				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.charset(StandardCharsets.UTF_8)
+				.distinct(false)
+				.numHeader(1)
+				.build();
+
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 
 		assertEquals(sortInBatch.size(), 1);
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, StandardCharsets.UTF_8, false, true);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 
 		assertEquals(mergeSortedFiles, 5);
 
@@ -79,6 +93,39 @@ public class CsvExternalSortTest {
 		assertEquals(lines.get(0), "2,זה רק טקסט אחי לקריאה קשה,8");
 		assertEquals(lines.get(1), "5,هذا هو النص إخوانه فقط من الصعب القراءة,3");
 		assertEquals(lines.get(2), "6,это не будет работать в других системах,3");
+	}
+
+	@Test
+	public void testMultiLineFileWthHeader() throws IOException, ClassNotFoundException {
+		String path = this.getClass().getClassLoader().getResource(FILE_CSV).getPath();
+
+		File file = new File(path);
+
+		outputfile = new File("outputSort1.csv");
+
+		Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
+				.compareTo(op2.get(0));
+
+		CsvSortOptions sortOptions = new CsvSortOptions
+				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.charset(Charset.defaultCharset())
+				.distinct(false)
+				.numHeader(1)
+				.skipHeader(false)
+				.build();
+
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
+
+		assertEquals(sortInBatch.size(), 1);
+
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
+
+		assertEquals(mergeSortedFiles, 5);
+
+		List<String> lines = Files.readAllLines(outputfile.toPath(), sortOptions.getCharset());
+
+		assertEquals(lines.get(0), "personId,text,ishired");
+		assertEquals(lines.get(1), "6,this wont work in other systems,3");
 	}
 
 	@After
