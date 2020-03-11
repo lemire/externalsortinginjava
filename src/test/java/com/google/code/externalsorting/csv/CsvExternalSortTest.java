@@ -1,5 +1,10 @@
 package com.google.code.externalsorting.csv;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.junit.After;
+import org.junit.Test;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,7 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -40,14 +47,16 @@ public class CsvExternalSortTest {
 				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
 				.charset(Charset.defaultCharset())
 				.distinct(false)
-				.numHeader(1, CSVFormat.DEFAULT)
+				.numHeader(1)
+				.skipHeader(true)
+				.format(CSVFormat.DEFAULT)
 				.build();
 
 		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 		
 		assertEquals(sortInBatch.size(), 1);
 		
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, CSVFormat.DEFAULT);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 		
 		assertEquals(mergeSortedFiles, 4);
 		
@@ -77,14 +86,16 @@ public class CsvExternalSortTest {
 				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
 				.charset(StandardCharsets.UTF_8)
 				.distinct(false)
-				.numHeader(1, CSVFormat.DEFAULT)
+				.numHeader(1)
+				.skipHeader(true)
+				.format(CSVFormat.DEFAULT)
 				.build();
 
 		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 
 		assertEquals(sortInBatch.size(), 1);
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, CSVFormat.DEFAULT);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 
 		assertEquals(mergeSortedFiles, 5);
 
@@ -113,11 +124,20 @@ public class CsvExternalSortTest {
 			Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
 					.compareTo(op2.get(0));
 
-			List<File> sortInBatch = CsvExternalSort.sortInBatch(file, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1, format.getKey());
+			CsvSortOptions sortOptions = new CsvSortOptions
+					.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+					.charset(Charset.defaultCharset())
+					.distinct(false)
+					.numHeader(1)
+					.skipHeader(true)
+					.format(format.getKey())
+					.build();
+
+			List<File> sortInBatch = CsvExternalSort.sortInBatch(file,  null, sortOptions);
 
 			assertEquals(sortInBatch.size(), 1);
 
-			int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, Charset.defaultCharset(), false, false, format.getKey());
+			int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, false);
 
 			assertEquals(mergeSortedFiles, 4);
 
@@ -144,6 +164,7 @@ public class CsvExternalSortTest {
 				.distinct(false)
 				.numHeader(1)
 				.skipHeader(false)
+				.format(CSVFormat.DEFAULT)
 				.build();
 
 		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);

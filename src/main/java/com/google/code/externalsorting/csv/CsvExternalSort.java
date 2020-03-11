@@ -82,7 +82,7 @@ public class CsvExternalSort {
 			if (!bfb.empty())
 				pq.add(bfb);
 		int rowcounter = 0;
-		CSVPrinter printer = new CSVPrinter(fbw, format);
+		CSVPrinter printer = new CSVPrinter(fbw, sortOptions.getFormat());
 		CSVRecord lastLine = null;
 		try {
 			while (pq.size() > 0) {
@@ -107,8 +107,8 @@ public class CsvExternalSort {
 			for (CSVRecordBuffer bfb : pq)
 				bfb.close();
 		}
-		return rowcounter;
 
+		return rowcounter;
 	}
 
 	public static int mergeSortedFiles(List<File> files, File outputfile, final CsvSortOptions sortOptions, boolean append) throws IOException, ClassNotFoundException {
@@ -117,7 +117,7 @@ public class CsvExternalSort {
 		for (File f : files) {
 			InputStream in = new FileInputStream(f);
 			BufferedReader fbr = new BufferedReader(new InputStreamReader(in, sortOptions.getCharset()));
-			CSVParser parser = new CSVParser(fbr, format);
+			CSVParser parser = new CSVParser(fbr, sortOptions.getFormat());
 			CSVRecordBuffer bfb = new CSVRecordBuffer(parser);
 			bfbs.add(bfb);
 		}
@@ -144,8 +144,7 @@ public class CsvExternalSort {
 		List<CSVRecord> tmplist = new ArrayList<CSVRecord>();
 		final CSVRecord[] header = new CSVRecord[1];
 
-		try (CSVParser parser = new CSVParser(fbr, CSVFormat.DEFAULT)) {
-		try (CSVParser parser = new CSVParser(fbr, format)) {
+		try (CSVParser parser = new CSVParser(fbr, sortOptions.getFormat())) {
 			parser.spliterator().forEachRemaining(e -> {
 				if (currentBlock.get() < blocksize) {
 					if (e.getRecordNumber() <= sortOptions.getNumHeader()) {
@@ -180,7 +179,7 @@ public class CsvExternalSort {
 
 		CSVRecord lastLine = null;
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(newtmpfile), sortOptions.getCharset());
-			 CSVPrinter printer = new CSVPrinter(new BufferedWriter(writer), CSVFormat.DEFAULT);
+			 CSVPrinter printer = new CSVPrinter(new BufferedWriter(writer), sortOptions.getFormat());
 		){
 			if (!sortOptions.isSkipHeader() && (header != null)){
 				printer.printRecord(header);

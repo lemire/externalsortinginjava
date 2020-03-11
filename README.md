@@ -47,7 +47,8 @@ CsvSortOptions sortOptions = new CsvSortOptions
 				.charset(Charset.defaultCharset())
 				.distinct(false)
 				.numHeader(1)
-				.skipHeader(true)
+				.skipHeader(false)
+				.format(CSVFormat.DEFAULT)
 				.build();
 
 // next two lines sort the lines from inputfile to outputfile

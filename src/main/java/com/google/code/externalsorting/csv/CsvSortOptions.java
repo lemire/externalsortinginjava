@@ -1,5 +1,6 @@
 package com.google.code.externalsorting.csv;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
 import java.nio.charset.Charset;
@@ -18,6 +19,7 @@ public class CsvSortOptions {
     private final boolean distinct;
     private final int numHeader; //number of header row in input file
     private final boolean skipHeader; //print header or not to output file
+    private final CSVFormat format;
 
     public long getDataLength() {
         return dataLength;
@@ -51,6 +53,10 @@ public class CsvSortOptions {
         return skipHeader;
     }
 
+    public CSVFormat getFormat() {
+        return format;
+    }
+
     public static class Builder {
         //mandatory params
         private final long datalength;
@@ -63,6 +69,7 @@ public class CsvSortOptions {
         private boolean distinct = false;
         private int numHeader = 0;
         private boolean skipHeader = true;
+        private CSVFormat format = CSVFormat.DEFAULT;
 
         public Builder(long datalength, Comparator<CSVRecord> cmp, int maxTmpFiles, long maxMemory) {
             this.datalength = datalength;
@@ -91,6 +98,12 @@ public class CsvSortOptions {
             return this;
         }
 
+        public Builder format(CSVFormat value){
+            format = value;
+            return this;
+        }
+
+
         public CsvSortOptions build(){
             return new CsvSortOptions(this);
         }
@@ -105,6 +118,7 @@ public class CsvSortOptions {
         this.distinct = builder.distinct;
         this.numHeader = builder.numHeader;
         this.skipHeader = builder.skipHeader;
+        this.format = builder.format;
     }
 
 }
