@@ -1,6 +1,5 @@
 package com.google.code.externalsorting.csv;
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -83,7 +82,7 @@ public class CsvExternalSort {
 			if (!bfb.empty())
 				pq.add(bfb);
 		int rowcounter = 0;
-		CSVPrinter printer = new CSVPrinter(fbw, CSVFormat.DEFAULT);
+		CSVPrinter printer = new CSVPrinter(fbw, format);
 		CSVRecord lastLine = null;
 		try {
 			while (pq.size() > 0) {
@@ -118,7 +117,7 @@ public class CsvExternalSort {
 		for (File f : files) {
 			InputStream in = new FileInputStream(f);
 			BufferedReader fbr = new BufferedReader(new InputStreamReader(in, sortOptions.getCharset()));
-			CSVParser parser = new CSVParser(fbr, CSVFormat.DEFAULT);
+			CSVParser parser = new CSVParser(fbr, format);
 			CSVRecordBuffer bfb = new CSVRecordBuffer(parser);
 			bfbs.add(bfb);
 		}
@@ -146,6 +145,7 @@ public class CsvExternalSort {
 		final CSVRecord[] header = new CSVRecord[1];
 
 		try (CSVParser parser = new CSVParser(fbr, CSVFormat.DEFAULT)) {
+		try (CSVParser parser = new CSVParser(fbr, format)) {
 			parser.spliterator().forEachRemaining(e -> {
 				if (currentBlock.get() < blocksize) {
 					if (e.getRecordNumber() <= sortOptions.getNumHeader()) {
