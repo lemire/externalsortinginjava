@@ -43,11 +43,20 @@ public class CsvExternalSortTest {
 		Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
 				.compareTo(op2.get(0));
 
-		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1, CSVFormat.DEFAULT);
+		CsvSortOptions sortOptions = new CsvSortOptions
+				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.charset(Charset.defaultCharset())
+				.distinct(false)
+				.numHeader(1)
+				.skipHeader(true)
+				.format(CSVFormat.DEFAULT)
+				.build();
+
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 		
 		assertEquals(sortInBatch.size(), 1);
 		
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, Charset.defaultCharset(), false, true, CSVFormat.DEFAULT);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 		
 		assertEquals(mergeSortedFiles, 4);
 		
@@ -73,11 +82,20 @@ public class CsvExternalSortTest {
 		Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
 				.compareTo(op2.get(0));
 
-		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, StandardCharsets.UTF_8, null, false, 1, CSVFormat.DEFAULT);
+		CsvSortOptions sortOptions = new CsvSortOptions
+				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.charset(StandardCharsets.UTF_8)
+				.distinct(false)
+				.numHeader(1)
+				.skipHeader(true)
+				.format(CSVFormat.DEFAULT)
+				.build();
+
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 
 		assertEquals(sortInBatch.size(), 1);
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, StandardCharsets.UTF_8, false, true, CSVFormat.DEFAULT);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 
 		assertEquals(mergeSortedFiles, 5);
 
@@ -106,11 +124,20 @@ public class CsvExternalSortTest {
 			Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
 					.compareTo(op2.get(0));
 
-			List<File> sortInBatch = CsvExternalSort.sortInBatch(file, comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, Charset.defaultCharset(), null, false, 1, format.getKey());
+			CsvSortOptions sortOptions = new CsvSortOptions
+					.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+					.charset(Charset.defaultCharset())
+					.distinct(false)
+					.numHeader(1)
+					.skipHeader(true)
+					.format(format.getKey())
+					.build();
+
+			List<File> sortInBatch = CsvExternalSort.sortInBatch(file,  null, sortOptions);
 
 			assertEquals(sortInBatch.size(), 1);
 
-			int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, comparator, Charset.defaultCharset(), false, false, format.getKey());
+			int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, false);
 
 			assertEquals(mergeSortedFiles, 4);
 
@@ -118,6 +145,40 @@ public class CsvExternalSortTest {
 
 			assertEquals(format.getValue().getExpected(), lines.get(0));
 		}
+	}
+
+	@Test
+	public void testMultiLineFileWthHeader() throws IOException, ClassNotFoundException {
+		String path = this.getClass().getClassLoader().getResource(FILE_CSV).getPath();
+
+		File file = new File(path);
+
+		outputfile = new File("outputSort1.csv");
+
+		Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
+				.compareTo(op2.get(0));
+
+		CsvSortOptions sortOptions = new CsvSortOptions
+				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.charset(Charset.defaultCharset())
+				.distinct(false)
+				.numHeader(1)
+				.skipHeader(false)
+				.format(CSVFormat.DEFAULT)
+				.build();
+
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
+
+		assertEquals(sortInBatch.size(), 1);
+
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
+
+		assertEquals(mergeSortedFiles, 5);
+
+		List<String> lines = Files.readAllLines(outputfile.toPath(), sortOptions.getCharset());
+
+		assertEquals(lines.get(0), "personId,text,ishired");
+		assertEquals(lines.get(1), "6,this wont work in other systems,3");
 	}
 
 	@After
