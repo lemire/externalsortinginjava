@@ -54,16 +54,16 @@ public class CsvExternalSortTest {
 
 		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 		
-		assertEquals(sortInBatch.size(), 1);
+		assertEquals(1, sortInBatch.size());
 		
 		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 		
-		assertEquals(mergeSortedFiles, 4);
+		assertEquals(4, mergeSortedFiles);
 		
 		BufferedReader reader = new BufferedReader(new FileReader(outputfile));
 		String readLine = reader.readLine();
 
-		assertEquals(readLine, "6,this wont work in other systems,3");
+		assertEquals("6,this wont work in other systems,3", readLine);
 		reader.close();
 	}
 
@@ -93,17 +93,17 @@ public class CsvExternalSortTest {
 
 		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 
-		assertEquals(sortInBatch.size(), 1);
+		assertEquals(1, sortInBatch.size());
 
 		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 
-		assertEquals(mergeSortedFiles, 5);
+		assertEquals(5, mergeSortedFiles);
 
 		List<String> lines = Files.readAllLines(Paths.get(outputfile.getPath()), StandardCharsets.UTF_8);
 
-		assertEquals(lines.get(0), "2,זה רק טקסט אחי לקריאה קשה,8");
-		assertEquals(lines.get(1), "5,هذا هو النص إخوانه فقط من الصعب القراءة,3");
-		assertEquals(lines.get(2), "6,это не будет работать в других системах,3");
+		assertEquals("2,זה רק טקסט אחי לקריאה קשה,8", lines.get(0));
+		assertEquals("5,هذا هو النص إخوانه فقط من الصعب القراءة,3", lines.get(1));
+		assertEquals("6,это не будет работать в других системах,3", lines.get(2));
 	}
 
 
@@ -135,11 +135,11 @@ public class CsvExternalSortTest {
 
 			List<File> sortInBatch = CsvExternalSort.sortInBatch(file,  null, sortOptions);
 
-			assertEquals(sortInBatch.size(), 1);
+			assertEquals(1, sortInBatch.size());
 
 			int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, false);
 
-			assertEquals(mergeSortedFiles, 4);
+			assertEquals(4, mergeSortedFiles);
 
 			List<String> lines = Files.readAllLines(outputfile.toPath());
 
@@ -169,16 +169,16 @@ public class CsvExternalSortTest {
 
 		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
 
-		assertEquals(sortInBatch.size(), 1);
+		assertEquals(1, sortInBatch.size());
 
 		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
 
-		assertEquals(mergeSortedFiles, 5);
+		assertEquals(5, mergeSortedFiles);
 
 		List<String> lines = Files.readAllLines(outputfile.toPath(), sortOptions.getCharset());
 
-		assertEquals(lines.get(0), "personId,text,ishired");
-		assertEquals(lines.get(1), "6,this wont work in other systems,3");
+		assertEquals("personId,text,ishired", lines.get(0));
+		assertEquals("6,this wont work in other systems,3", lines.get(1));
 	}
 
 	@After

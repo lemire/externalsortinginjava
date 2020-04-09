@@ -90,6 +90,7 @@ How to build
 - get the java jdk
 - Install Maven 2
 - mvn install - builds jar (requires signing)
+- or mvn package - builds jar (does not require signing)
 - mvn test - runs tests
 
 

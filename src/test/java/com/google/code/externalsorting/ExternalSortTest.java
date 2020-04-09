@@ -6,32 +6,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -478,7 +460,7 @@ public class ExternalSortTest {
         Random rand = new Random();
         final Path path = Files.createTempFile("TestCsvWithLongIds", ".csv");
         final Path pathSorted = Files.createTempFile("TestCsvWithLongIdsSorted", ".csv");
-        TreeSet<Long> sortedIds = new TreeSet<>();
+        Set<Long> sortedIds = new TreeSet<>();
         try (FileWriter fw = new FileWriter(path.toFile());
              BufferedWriter bw = new BufferedWriter(fw)) {
             for (int i = 0; i < 1000; ++i) {
@@ -512,7 +494,7 @@ public class ExternalSortTest {
                 "Val2,Data2,Data4,Data5\r\n" +
                 "Val1,Data2,Data3,Data5\r\n" +
                 "Val2,Data2,Data6,Data7\r\n";
-        ByteArrayInputStream bis = new ByteArrayInputStream(unsortedContent.getBytes(StandardCharsets.UTF_8));
+        InputStream bis = new ByteArrayInputStream(unsortedContent.getBytes(StandardCharsets.UTF_8));
         File tmpDirectory = Files.createTempDirectory("sort").toFile();
         tmpDirectory.deleteOnExit();
 

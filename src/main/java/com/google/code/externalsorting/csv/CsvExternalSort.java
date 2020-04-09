@@ -71,7 +71,7 @@ public class CsvExternalSort {
 	}
 
 	public static int mergeSortedFiles(BufferedWriter fbw, final CsvSortOptions sortOptions,
-			ArrayList<CSVRecordBuffer> bfbs) throws IOException, ClassNotFoundException {
+			List<CSVRecordBuffer> bfbs) throws IOException, ClassNotFoundException {
 		PriorityQueue<CSVRecordBuffer> pq = new PriorityQueue<CSVRecordBuffer>(11, new Comparator<CSVRecordBuffer>() {
 			@Override
 			public int compare(CSVRecordBuffer i, CSVRecordBuffer j) {
@@ -113,7 +113,7 @@ public class CsvExternalSort {
 
 	public static int mergeSortedFiles(List<File> files, File outputfile, final CsvSortOptions sortOptions, boolean append) throws IOException, ClassNotFoundException {
 
-		ArrayList<CSVRecordBuffer> bfbs = new ArrayList<CSVRecordBuffer>();
+		List<CSVRecordBuffer> bfbs = new ArrayList<CSVRecordBuffer>();
 		for (File f : files) {
 			InputStream in = new FileInputStream(f);
 			BufferedReader fbr = new BufferedReader(new InputStreamReader(in, sortOptions.getCharset()));
