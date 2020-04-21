@@ -146,14 +146,13 @@ public class CsvExternalSort {
 
 		try (CSVParser parser = new CSVParser(fbr, sortOptions.getFormat())) {
 			parser.spliterator().forEachRemaining(e -> {
-				if (currentBlock.get() < blocksize) {
-					if (e.getRecordNumber() <= sortOptions.getNumHeader()) {
+				if (e.getRecordNumber() <= sortOptions.getNumHeader()) {
 						header[0] = e;
 					} else {
 						tmplist.add(e);
 						currentBlock.addAndGet(SizeEstimator.estimatedSizeOf(e));
-					}
-				} else {
+				}
+				if(currentBlock.get() >= blocksize) {
 					try {
 						files.add(sortAndSave(tmplist, tmpdirectory, sortOptions, header[0]));
 					} catch (IOException e1) {
