@@ -7,13 +7,13 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 public class CSVRecordBuffer {
-	
+
 	private Iterator<CSVRecord> iterator;
 
 	private CSVParser parser;
 
 	private CSVRecord cache;
-	
+
 	public CSVRecordBuffer(CSVParser parser) throws IOException, ClassNotFoundException {
 		this.iterator = parser.iterator();
 		this.parser = parser;

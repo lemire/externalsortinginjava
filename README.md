@@ -43,7 +43,7 @@ Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0).compareTo(op2.get(0)
 //... outputfile: output file name
 //...provide sort options
 CsvSortOptions sortOptions = new CsvSortOptions
-				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.Builder(comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, CsvExternalSort.estimateAvailableMemory())
 				.charset(Charset.defaultCharset())
 				.distinct(false)
 				.numHeader(1)

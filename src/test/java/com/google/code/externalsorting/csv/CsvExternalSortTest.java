@@ -44,7 +44,7 @@ public class CsvExternalSortTest {
 				.compareTo(op2.get(0));
 
 		CsvSortOptions sortOptions = new CsvSortOptions
-				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.Builder(comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, CsvExternalSort.estimateAvailableMemory())
 				.charset(Charset.defaultCharset())
 				.distinct(false)
 				.numHeader(1)
@@ -83,7 +83,7 @@ public class CsvExternalSortTest {
 				.compareTo(op2.get(0));
 
 		CsvSortOptions sortOptions = new CsvSortOptions
-				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.Builder(comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, CsvExternalSort.estimateAvailableMemory())
 				.charset(StandardCharsets.UTF_8)
 				.distinct(false)
 				.numHeader(1)
@@ -125,7 +125,7 @@ public class CsvExternalSortTest {
 					.compareTo(op2.get(0));
 
 			CsvSortOptions sortOptions = new CsvSortOptions
-					.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+					.Builder(comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, CsvExternalSort.estimateAvailableMemory())
 					.charset(Charset.defaultCharset())
 					.distinct(false)
 					.numHeader(1)
@@ -159,7 +159,7 @@ public class CsvExternalSortTest {
 				.compareTo(op2.get(0));
 
 		CsvSortOptions sortOptions = new CsvSortOptions
-				.Builder(CsvExternalSort.DEFAULTMAXTEMPFILES, comparator, 1, CsvExternalSort.estimateAvailableMemory())
+				.Builder(comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, CsvExternalSort.estimateAvailableMemory())
 				.charset(Charset.defaultCharset())
 				.distinct(false)
 				.numHeader(1)
