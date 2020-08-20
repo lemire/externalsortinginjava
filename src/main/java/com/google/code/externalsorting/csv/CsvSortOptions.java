@@ -10,7 +10,6 @@ import java.util.Comparator;
  * Parameters for csv sorting
  */
 public class CsvSortOptions {
-    private final long dataLength;
     private final Comparator<CSVRecord> comparator;
     private final int maxTmpFiles;
     private final long maxMemory;
@@ -20,10 +19,6 @@ public class CsvSortOptions {
     private final int numHeader; //number of header row in input file
     private final boolean skipHeader; //print header or not to output file
     private final CSVFormat format;
-
-    public long getDataLength() {
-        return dataLength;
-    }
 
     public Comparator<CSVRecord> getComparator() {
         return comparator;
@@ -59,7 +54,6 @@ public class CsvSortOptions {
 
     public static class Builder {
         //mandatory params
-        private final long datalength;
         private final Comparator<CSVRecord> cmp;
         private final int maxTmpFiles;
         private final long maxMemory;
@@ -71,8 +65,7 @@ public class CsvSortOptions {
         private boolean skipHeader = true;
         private CSVFormat format = CSVFormat.DEFAULT;
 
-        public Builder(long datalength, Comparator<CSVRecord> cmp, int maxTmpFiles, long maxMemory) {
-            this.datalength = datalength;
+        public Builder(Comparator<CSVRecord> cmp, int maxTmpFiles, long maxMemory) {
             this.cmp = cmp;
             this.maxTmpFiles = maxTmpFiles;
             this.maxMemory = maxMemory;
@@ -110,7 +103,6 @@ public class CsvSortOptions {
     }
 
     private CsvSortOptions(Builder builder){
-        this.dataLength = builder.datalength;
         this.comparator = builder.cmp;
         this.maxTmpFiles = builder.maxTmpFiles;
         this.maxMemory = builder.maxMemory;
