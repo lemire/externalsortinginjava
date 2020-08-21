@@ -82,7 +82,7 @@ You can also specify the dependency in the Maven "pom.xml" file:
          <dependency>
 	     <groupId>com.google.code.externalsortinginjava</groupId>
 	     <artifactId>externalsortinginjava</artifactId>
-	     <version>[0.5.0,)</version>
+	     <version>[0.6.0,)</version>
          </dependency>
      </dependencies>
 ```
