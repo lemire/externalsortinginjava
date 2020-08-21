@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -51,12 +52,13 @@ public class CsvExternalSortTest {
 				.skipHeader(true)
 				.format(CSVFormat.DEFAULT)
 				.build();
+		ArrayList<CSVRecord> header = new ArrayList<CSVRecord>();
 
-		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
 		
 		assertEquals(1, sortInBatch.size());
 		
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
 		
 		assertEquals(4, mergeSortedFiles);
 		
@@ -90,12 +92,12 @@ public class CsvExternalSortTest {
 				.skipHeader(true)
 				.format(CSVFormat.DEFAULT)
 				.build();
-
-		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
+		ArrayList<CSVRecord> header = new ArrayList<CSVRecord>();
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
 
 		assertEquals(1, sortInBatch.size());
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
 
 		assertEquals(5, mergeSortedFiles);
 
@@ -132,18 +134,19 @@ public class CsvExternalSortTest {
 					.skipHeader(true)
 					.format(format.getKey())
 					.build();
-
-			List<File> sortInBatch = CsvExternalSort.sortInBatch(file,  null, sortOptions);
+			ArrayList<CSVRecord> header = new ArrayList<CSVRecord>();
+			List<File> sortInBatch = CsvExternalSort.sortInBatch(file,  null, sortOptions, header);
 
 			assertEquals(1, sortInBatch.size());
 
-			int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, false);
+			int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, false, header);
 
 			assertEquals(4, mergeSortedFiles);
 
 			List<String> lines = Files.readAllLines(outputfile.toPath());
 
 			assertEquals(format.getValue().getExpected(), lines.get(0));
+			assertEquals(4, lines.size());
 		}
 	}
 
@@ -166,19 +169,22 @@ public class CsvExternalSortTest {
 				.skipHeader(false)
 				.format(CSVFormat.DEFAULT)
 				.build();
-
-		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);
+		ArrayList<CSVRecord> header = new ArrayList<CSVRecord>();
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
 
 		assertEquals(1, sortInBatch.size());
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
-
-		assertEquals(5, mergeSortedFiles);
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
 
 		List<String> lines = Files.readAllLines(outputfile.toPath(), sortOptions.getCharset());
 
 		assertEquals("personId,text,ishired", lines.get(0));
 		assertEquals("6,this wont work in other systems,3", lines.get(1));
+		assertEquals("6,this wont work in other systems,3", lines.get(2));
+		assertEquals("7,My Broken Text will break you all,1", lines.get(3));
+		assertEquals("8,this is only bro text for hard read,2", lines.get(4));
+		assertEquals(5, lines.size());
+
 	}
 
 	@After

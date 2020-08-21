@@ -50,10 +50,13 @@ CsvSortOptions sortOptions = new CsvSortOptions
 				.skipHeader(false)
 				.format(CSVFormat.DEFAULT)
 				.build();
+// container to store the header lines
+ArrayList<CSVRecord> header = new ArrayList<CSVRecord>();
 
 // next two lines sort the lines from inputfile to outputfile
-List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions);;
-CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true);
+List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
+// at this point you can access header if you'd like.
+CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
 
 ```
 
