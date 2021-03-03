@@ -60,6 +60,8 @@ CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, hea
 
 ```
 
+The `numHeader` parameter is the number of lines of headers in the CSV files (typically 1 or 0) and the `skipHeader` parameter indicates whether you would like to exclude these lines from the parsing.
+
 API Documentation
 -----------------
 
