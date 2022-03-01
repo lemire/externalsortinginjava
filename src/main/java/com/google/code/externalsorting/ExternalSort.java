@@ -910,11 +910,17 @@ public class ExternalSort {
 
         /**
          * default comparator between strings.
+         * While sorting integers without casting inputs to integers
+         * gives incorrect sort for ex., 1000000000 is less than 100000001
          */
         public static Comparator<String> defaultcomparator = new Comparator<String>() {
                 @Override
                 public int compare(String r1, String r2) {
-                        return r1.compareTo(r2);
+                        if(r1.matches("\\d+") && r2.matches("\\d+")) {
+                                return Integer.compare(Integer.parseInt(r1), Integer.parseInt(r2));
+                        } else {
+                                return r1.compareTo(r2);
+                        }                        
                 }
         };
 

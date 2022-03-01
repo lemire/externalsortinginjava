@@ -151,6 +151,15 @@ public class ExternalSortTest {
 
     }
 
+    /**
+     * Compare integers only to verify they are sorted as epected
+     */
+    @Test
+    public void compareIntegers() {        
+        assertEquals(ExternalSort.defaultcomparator.compare("1000000000", "100000001"), 1);
+        assertEquals(ExternalSort.defaultcomparator.compare("100000001", "1000000000"), -1);
+    }
+
     @Test
     public void stringSizeEstimator() {
       for(int k = 0; k < 10; ++k) {
