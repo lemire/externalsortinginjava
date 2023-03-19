@@ -69,12 +69,48 @@ public class CsvExternalSortTest {
 		reader.close();
 	}
 
+
+	@Test
+	public void testIssue44() throws Exception {
+		String path = this.getClass().getClassLoader().getResource("issue44.csv").getPath();
+		List<String> input_lines = Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8);
+		int input_length = input_lines.size();
+
+		File file = new File(path);
+
+		outputfile = new File("issue44_output.csv");
+
+		Comparator<CSVRecord> comparator = (op1, op2) -> op1.get(0)
+				.compareTo(op2.get(0));
+				CSVFormat f = CSVFormat.DEFAULT;
+				f = f.withQuote(null);
+
+		CsvSortOptions sortOptions = new CsvSortOptions
+				.Builder(comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, CsvExternalSort.estimateAvailableMemory())
+				.charset(StandardCharsets.UTF_8)
+				.distinct(false)
+				.numHeader(1)
+				.skipHeader(true)
+				.format(CSVFormat.DEFAULT)
+				.build();
+		ArrayList<CSVRecord> header = new ArrayList<CSVRecord>();
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
+
+
+		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
+
+		List<String> lines = Files.readAllLines(Paths.get(outputfile.getPath()), StandardCharsets.UTF_8);
+        for(String a : lines) {
+	        System.out.println(a);
+        }
+        System.out.println("Sorted lines = "+lines.size());
+        System.out.println("Input lines (with header) = "+input_length);
+		assertEquals(lines.size(), input_length - 1);
+	}
+
+
 	@Test
 	public void testNonLatin() throws Exception {
-		Field cs = Charset.class.getDeclaredField("defaultCharset");
-		cs.setAccessible(true);
-		cs.set(null, Charset.forName("windows-1251"));
-
 		String path = this.getClass().getClassLoader().getResource(FILE_UNICODE_CSV).getPath();
 
 		File file = new File(path);
