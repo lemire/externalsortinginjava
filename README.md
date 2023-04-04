@@ -1,6 +1,5 @@
 Externalsortinginjava
 ==========================================================
-[![Build Status](https://travis-ci.org/lemire/externalsortinginjava.png)](https://travis-ci.org/lemire/externalsortinginjava)
 [![][maven img]][maven]
 [![][license img]][license]
 [![docs-badge][]][docs]
