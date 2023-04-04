@@ -81,7 +81,7 @@ public class CsvExternalSort {
 		for (CSVRecordBuffer bfb : bfbs)
 			if (!bfb.empty())
 				pq.add(bfb);
-		int rowcounter = 0;
+		int numWrittenLines = 0;
 		CSVPrinter printer = new CSVPrinter(fbw, sortOptions.getFormat());
 		if(! sortOptions.isSkipHeader()) {
 			for(CSVRecord r: header) {
@@ -98,8 +98,8 @@ public class CsvExternalSort {
 				} else {
 					printer.printRecord(r);
 					lastLine = r;
+					++numWrittenLines;
 				}
-				++rowcounter;
 				if (bfb.empty()) {
 					bfb.close();
 				} else {
@@ -113,7 +113,7 @@ public class CsvExternalSort {
 				bfb.close();
 		}
 
-		return rowcounter;
+		return numWrittenLines;
 	}
 
 	public static int mergeSortedFiles(List<File> files, File outputfile, final CsvSortOptions sortOptions,
@@ -131,14 +131,14 @@ public class CsvExternalSort {
 		BufferedWriter fbw = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputfile, append), sortOptions.getCharset()));
 
-		int rowcounter = mergeSortedFiles(fbw, sortOptions, bfbs, header);
+		int numWrittenLines = mergeSortedFiles(fbw, sortOptions, bfbs, header);
 		for (File f : files) {
 			if (!f.delete()) {
 				LOG.log(Level.WARNING, String.format("The file %s was not deleted", f.getName()));
 			}
 		}
 
-		return rowcounter;
+		return numWrittenLines;
 	}
 
 	public static List<File> sortInBatch(long size_in_byte, final BufferedReader fbr, final File tmpdirectory,
