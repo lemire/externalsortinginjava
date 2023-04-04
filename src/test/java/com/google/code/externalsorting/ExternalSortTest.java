@@ -1,5 +1,6 @@
 package com.google.code.externalsorting;
 
+import static com.google.code.externalsorting.ExternalSort.defaultcomparator;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -206,8 +207,8 @@ public class ExternalSortTest {
         };
         File out = File.createTempFile("test_results", ".tmp", null);
         out.deleteOnExit();
-        ExternalSort.mergeSortedFiles(this.fileList, out, cmp,
-                                      Charset.defaultCharset(), true);
+        long numLinesWritten = ExternalSort.mergeSortedFiles(this.fileList, out, cmp,
+                Charset.defaultCharset(), true);
 
         List<String> result = new ArrayList<>();
         try (BufferedReader bf = new BufferedReader(new FileReader(out))) {
@@ -215,6 +216,8 @@ public class ExternalSortTest {
                 result.add(line);
             }
         }
+
+        assertEquals(11, numLinesWritten);
         assertArrayEquals(Arrays.toString(result.toArray()), EXPECTED_MERGE_DISTINCT_RESULTS,
                           result.toArray());
     }
@@ -399,9 +402,22 @@ public class ExternalSortTest {
     public void sortVeryLargeFile() throws IOException {
         final Path veryLargeFile = getTestFile();
         final Path outputFile = Files.createTempFile("Merged-File", ".tmp");
-        final long sortedLines = ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(veryLargeFile.toFile()), outputFile.toFile());
+        final long numLinesWritten = ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(veryLargeFile.toFile()), outputFile.toFile());
         final long expectedLines = 2148L * 1000000L;
-        assertEquals(expectedLines, sortedLines);
+        assertEquals(expectedLines, numLinesWritten);
+    }
+
+    @Ignore("This test takes too long to execute")
+    @Test
+    public void sortVeryLargeFileWhenDistinctEnabled() throws IOException {
+        boolean distinctEnabled = true;
+        final Path veryLargeFile = getTestFile();
+        final File outputFile = Files.createTempFile("Merged-File", ".tmp").toFile();
+        List<File> veryLargeSortBatch = ExternalSort.sortInBatch(veryLargeFile.toFile());
+
+        long numLinesWritten = ExternalSort.mergeSortedFiles(veryLargeSortBatch, outputFile, defaultcomparator, distinctEnabled);
+
+        assertEquals(1 /* 😸 */, numLinesWritten);
     }
 
     /**

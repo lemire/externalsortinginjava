@@ -226,7 +226,7 @@ public class ExternalSort {
                                 pq.add(bfb);
                         }
                 }
-                long rowcounter = 0;
+                long numLinesWritten = 0;
                 try {
                         if (!distinct) {
                             while (pq.size() > 0) {
@@ -234,7 +234,7 @@ public class ExternalSort {
                                     String r = bfb.pop();
                                     fbw.write(r);
                                     fbw.newLine();
-                                    ++rowcounter;
+                                    ++numLinesWritten;
                                     if (bfb.empty()) {
                                             bfb.close();
                                     } else {
@@ -248,7 +248,7 @@ public class ExternalSort {
                            lastLine = bfb.pop();
                            fbw.write(lastLine);
                            fbw.newLine();
-                           ++rowcounter;
+                           ++numLinesWritten;
                            if (bfb.empty()) {
                              bfb.close();
                            } else {
@@ -263,8 +263,8 @@ public class ExternalSort {
                             fbw.write(r);
                             fbw.newLine();
                             lastLine = r;
+                            ++numLinesWritten;
                           }
-                          ++rowcounter;
                           if (bfb.empty()) {
                             bfb.close();
                           } else {
@@ -278,7 +278,7 @@ public class ExternalSort {
                                 bfb.close();
                         }
                 }
-                return rowcounter;
+                return numLinesWritten;
 
         }
 
@@ -460,11 +460,11 @@ public class ExternalSort {
                         BinaryFileBuffer bfb = new BinaryFileBuffer(br);
                         bfbs.add(bfb);
                 }
-                long rowcounter = mergeSortedFiles(fbw, cmp, distinct, bfbs);
+                long numLinesWritten = mergeSortedFiles(fbw, cmp, distinct, bfbs);
                 for (File f : files) {
                         f.delete();
                 }
-                return rowcounter;
+                return numLinesWritten;
         }
 
         /**

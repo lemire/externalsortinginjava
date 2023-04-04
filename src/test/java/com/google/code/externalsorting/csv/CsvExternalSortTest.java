@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 
 public class CsvExternalSortTest {
@@ -97,7 +97,7 @@ public class CsvExternalSortTest {
 		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
 
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
+		CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
 
 		List<String> lines = Files.readAllLines(Paths.get(outputfile.getPath()), StandardCharsets.UTF_8);
         for(String a : lines) {
@@ -133,9 +133,9 @@ public class CsvExternalSortTest {
 
 		assertEquals(1, sortInBatch.size());
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
+		int numLinesWritten = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
 
-		assertEquals(5, mergeSortedFiles);
+		assertEquals(5, numLinesWritten);
 
 		List<String> lines = Files.readAllLines(Paths.get(outputfile.getPath()), StandardCharsets.UTF_8);
 
@@ -175,9 +175,9 @@ public class CsvExternalSortTest {
 
 			assertEquals(1, sortInBatch.size());
 
-			int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, false, header);
+			int numLinesWritten = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, false, header);
 
-			assertEquals(4, mergeSortedFiles);
+			assertEquals(4, numLinesWritten);
 
 			List<String> lines = Files.readAllLines(outputfile.toPath());
 
@@ -210,7 +210,7 @@ public class CsvExternalSortTest {
 
 		assertEquals(1, sortInBatch.size());
 
-		int mergeSortedFiles = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
+		CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
 
 		List<String> lines = Files.readAllLines(outputfile.toPath(), sortOptions.getCharset());
 
@@ -221,6 +221,43 @@ public class CsvExternalSortTest {
 		assertEquals("8,this is only bro text for hard read,2", lines.get(4));
 		assertEquals(5, lines.size());
 
+	}
+
+	@Test
+	public void testNumLinesWrittenIfDistinctEnabled() throws IOException, ClassNotFoundException {
+		boolean distinctEnabled = true;
+		String path = this.getClass().getClassLoader().getResource(FILE_CSV).getPath();
+		File file = new File(path);
+		outputfile = new File("outputSort1.csv");
+
+		Comparator<CSVRecord> comparator = Comparator.comparing(op -> op.get(0));
+
+		CsvSortOptions sortOptions = new CsvSortOptions
+				.Builder(comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, CsvExternalSort.estimateAvailableMemory())
+				.charset(Charset.defaultCharset())
+				.distinct(distinctEnabled)
+				.numHeader(1)
+				.skipHeader(true)
+				.format(CSVFormat.DEFAULT)
+				.build();
+		ArrayList<CSVRecord> header = new ArrayList<CSVRecord>();
+
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
+
+		int numLinesWritten = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
+
+		BufferedReader reader = new BufferedReader(new FileReader(outputfile));
+
+		assertEquals(1, sortInBatch.size());
+		assertEquals(3, numLinesWritten);
+
+		String firstLine = reader.readLine();
+		assertEquals("6,this wont work in other systems,3", firstLine);
+
+		String secondLine = reader.readLine();
+		assertNotEquals(firstLine, secondLine);
+
+		reader.close();
 	}
 
 	@After

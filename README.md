@@ -23,7 +23,7 @@ import com.google.code.externalsorting.ExternalSort;
 //... inputfile: input file name
 //... outputfile: output file name
 // next command sorts the lines from inputfile to outputfile
-ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(new File(inputfile)), new File(outputfile));
+int numLinesWritten = ExternalSort.mergeSortedFiles(ExternalSort.sortInBatch(new File(inputfile)), new File(outputfile));
 // you can also provide a custom string comparator, see API
 ```
 
@@ -56,7 +56,7 @@ ArrayList<CSVRecord> header = new ArrayList<CSVRecord>();
 // next two lines sort the lines from inputfile to outputfile
 List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
 // at this point you can access header if you'd like.
-CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
+int numWrittenLines = CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
 
 ```
 
