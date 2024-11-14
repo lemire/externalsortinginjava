@@ -153,7 +153,24 @@ public class CsvExternalSort {
 
 		try (CSVParser parser = new CSVParser(fbr, sortOptions.getFormat())) {
 			parser.spliterator().forEachRemaining(e -> {
-				if (e.getRecordNumber() <= sortOptions.getNumHeader()) {
+				// CSVParser parses and removes the header in this condition where the parser discovers the header
+				// and the comparator can use the column names.
+				// For us to publish the header on output, we need to set `header`
+				if (header.isEmpty() && sortOptions.getFormat().getSkipHeaderRecord() &&
+						sortOptions.getFormat().getHeader().length == 0) {
+					// need to coerce the headers back into a CsvRecord
+					try {
+						header.add(CSVParser.parse(String.join(",", parser.getHeaderNames()), CSVFormat.DEFAULT)
+								.getRecords().get(0)
+						);
+					} catch (IOException ex) {
+						LOG.log(Level.WARNING,
+								String.format("Error making CSVRecord for headers: '%s'", parser.getHeaderNames()),
+								ex);
+					}
+					tmplist.add(e);
+					currentBlock.addAndGet(SizeEstimator.estimatedSizeOf(e));
+				} else if (e.getRecordNumber() <= sortOptions.getNumHeader()) {
 					header.add(e);
 				} else {
 					tmplist.add(e);
@@ -163,7 +180,7 @@ public class CsvExternalSort {
 					try {
 						files.add(sortAndSave(tmplist, tmpdirectory, sortOptions));
 					} catch (IOException e1) {
-						LOG.log(Level.WARNING, String.format("Error during the sort in batch"), e1);
+						LOG.log(Level.WARNING, "Error during the sort in batch", e1);
 					}
 					tmplist.clear();
 					currentBlock.getAndSet(0);

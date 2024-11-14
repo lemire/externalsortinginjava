@@ -19,6 +19,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.google.code.externalsorting.csv.CsvExternalSort;
+import com.google.code.externalsorting.csv.CsvSortOptions;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -320,6 +324,65 @@ public class ExternalSortTest {
 
         ArrayList<String> result = readLines(listOfFiles.get(0));
         assertArrayEquals(Arrays.toString(result.toArray()),EXPECTED_MERGE_DISTINCT_RESULTS, result.toArray());
+    }
+
+    /**
+     * Use csv column names in comparator and ensure they get copied to final file.
+     */
+    @Test
+    public void testSortNamedColumns() throws Exception {
+        List<CSVRecord> headers = new ArrayList<>(1);
+        Comparator<CSVRecord> idComparator = (op1, op2) ->
+                op1.get("personId").compareTo(op2.get("personId"));
+
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                .setSkipHeaderRecord(true)
+                .setHeader()
+                .build();
+
+        CsvSortOptions sortOptions = new CsvSortOptions.Builder(idComparator,
+                ExternalSort.DEFAULTMAXTEMPFILES,
+                CsvExternalSort.estimateAvailableMemory())
+                .format(csvFormat)
+                .skipHeader(false)
+                .numHeader(1)
+                .distinct(false)
+                .build();
+
+        List<File> intermediates = CsvExternalSort.sortInBatch(
+                new File(this.getClass().getClassLoader()
+                        .getResource("externalSorting.csv").toURI()),
+                null,
+                sortOptions,
+                headers
+        );
+
+        assertEquals(1, headers.size());
+        assertEquals(3, headers.get(0).size());
+        assertEquals("personId", headers.get(0).get(0));
+
+        // check intermediate file (no headers)
+        assertFalse(intermediates.isEmpty());
+        ArrayList<String> result = readLines(intermediates.get(0));
+        // assumes no one changes the file
+        assertTrue(result.get(0).startsWith("6,"));
+        int lineCount = result.size();
+
+        // merge and check resulting file
+        File tempFile = File.createTempFile("test", ".csv");
+        CsvExternalSort.mergeSortedFiles(
+                intermediates,
+                tempFile,
+                sortOptions,
+                false,
+                headers
+        );
+        ArrayList<String> finalResult = readLines(tempFile);
+        // does it have headers?
+        assertTrue(finalResult.get(0).startsWith("personId"));
+        // assumes no one changes the file
+        assertTrue(finalResult.get(1).startsWith("6,"));
+        assertEquals(lineCount, finalResult.size());
     }
 
     /**
