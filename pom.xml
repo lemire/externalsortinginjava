@@ -214,9 +214,9 @@
         </plugins>
     </build>
     <scm>
-        <connection>scm:git:git@github.com:lemire/externalsortinginjava.git</connection>
-        <url>scm:git:git@github.com:lemire/externalsortinginjava.git</url>
-        <developerConnection>scm:git:git@github.com:lemire/externalsortinginjava.git</developerConnection>
+    <connection>scm:git:https://github.com/lemire/externalsortinginjava.git</connection>
+    <url>scm:git:https://github.com/lemire/externalsortinginjava.git</url>
+    <developerConnection>scm:git:https://github.com/lemire/externalsortinginjava.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
