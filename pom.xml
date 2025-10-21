@@ -233,4 +233,22 @@
       <url>https://repo.maven.apache.org/maven2/</url>
     </repository>
   </distributionManagement>
+
+  <developers>
+    <developer>
+      <id>lemire</id>
+      <name>Daniel Lemire</name>
+      <email>daniel@lemire.me</email>
+      <url>http://lemire.me/en/</url>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+        <role>maintainer</role>
+      </roles>
+      <timezone>-5</timezone>
+      <properties>
+        <picUrl>http://lemire.me/fr/images/JPG/profile2011B_152.jpg</picUrl>
+      </properties>
+    </developer>
+  </developers>
 </project>
