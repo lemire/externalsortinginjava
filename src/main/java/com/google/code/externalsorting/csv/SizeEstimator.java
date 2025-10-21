@@ -1,21 +1,26 @@
 package com.google.code.externalsorting.csv;
 
+/**
+ * Utility class for estimating the memory size of objects and arrays in the JVM.
+ * This is used to approximate the memory usage of CSV records and related structures.
+ */
 public final class SizeEstimator {
-	
 	private static int OBJ_HEADER;
 	private static int ARR_HEADER;
 	private static int INT_FIELDS = 12;
 	private static int OBJ_REF;
 	private static int OBJ_OVERHEAD;
 	private static boolean IS_64_BIT_JVM;
-	
-	private SizeEstimator() {
-		
-	}
-	
+
 	/**
-	 * Class initializations.
-	 */
+     * Private constructor to prevent instantiation.
+     */
+	private SizeEstimator() {
+	}
+
+	/**
+     * Class initializations.
+     */
 	static {
 		// By default we assume 64 bit JVM
 		// (defensive approach since we will get

@@ -1,6 +1,5 @@
 package com.google.code.externalsorting;
 
-// filename: ExternalSort.java
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.EOFException;
@@ -48,65 +47,49 @@ import java.util.zip.GZIPOutputStream;
  * http://lemire.me/blog/archives/2010/04/01/external-memory-sorting-in-java/
  */
 public class ExternalSort {
-
-
+        /**
+         * Default constructor for ExternalSort.
+         * No initialization required.
+         */
+        public ExternalSort() {
+        }
+        /**
+         * Affiche l'utilisation du programme sur la sortie standard.
+         */
         private static void displayUsage() {
-                System.out
-                        .println("java com.google.externalsorting.ExternalSort inputfile outputfile");
+                System.out.println("java com.google.externalsorting.ExternalSort inputfile outputfile");
                 System.out.println("Flags are:");
                 System.out.println("-v or --verbose: verbose output");
                 System.out.println("-d or --distinct: prune duplicate lines");
-                System.out
-                        .println("-t or --maxtmpfiles (followed by an integer): specify an upper bound on the number of temporary files");
-                System.out
-                        .println("-c or --charset (followed by a charset code): specify the character set to use (for sorting)");
-                System.out
-                        .println("-z or --gzip: use compression for the temporary files");
-                System.out
-                        .println("-H or --header (followed by an integer): ignore the first few lines");
-                System.out
-                        .println("-s or --store (following by a path): where to store the temporary files");
+                System.out.println("-t or --maxtmpfiles (followed by an integer): specify an upper bound on the number of temporary files");
+                System.out.println("-c or --charset (followed by a charset code): specify the character set to use (for sorting)");
+                System.out.println("-z or --gzip: use compression for the temporary files");
+                System.out.println("-H or --header (followed by an integer): ignore the first few lines");
+                System.out.println("-s or --store (following by a path): where to store the temporary files");
                 System.out.println("-h or --help: display this message");
         }
 
         /**
-         * This method calls the garbage collector and then returns the free
-         * memory. This avoids problems with applications where the GC hasn't
-         * reclaimed memory and reports no available memory.
-         *
-         * @return available memory
+         * Cette méthode appelle le garbage collector et retourne la mémoire libre.
+         * @return mémoire disponible en octets
          */
         public static long estimateAvailableMemory() {
-          System.gc();
-          // http://stackoverflow.com/questions/12807797/java-get-available-memory
-          Runtime r = Runtime.getRuntime();
-          long allocatedMemory = r.totalMemory() - r.freeMemory();
-          long presFreeMemory = r.maxMemory() - allocatedMemory;
-          return presFreeMemory;
+                System.gc();
+                Runtime r = Runtime.getRuntime();
+                long allocatedMemory = r.totalMemory() - r.freeMemory();
+                long presFreeMemory = r.maxMemory() - allocatedMemory;
+                return presFreeMemory;
         }
 
         /**
-         * we divide the file into small blocks. If the blocks are too small, we
-         * shall create too many temporary files. If they are too big, we shall
-         * be using too much memory.
-         *
-         * @param sizeoffile how much data (in bytes) can we expect
-         * @param maxtmpfiles how many temporary files can we create (e.g., 1024)
-         * @param maxMemory Maximum memory to use (in bytes)
-         * @return the estimate
+         * Calcule la taille optimale des blocs pour le tri externe.
+         * @param sizeoffile taille du fichier en octets
+         * @param maxtmpfiles nombre maximal de fichiers temporaires
+         * @param maxMemory mémoire maximale à utiliser
+         * @return estimation de la taille du bloc
          */
-        public static long estimateBestSizeOfBlocks(final long sizeoffile,
-                final int maxtmpfiles, final long maxMemory) {
-                // we don't want to open up much more than maxtmpfiles temporary
-                // files, better run
-                // out of memory first.
-                long blocksize = sizeoffile / maxtmpfiles
-                        + (sizeoffile % maxtmpfiles == 0 ? 0 : 1);
-
-                // on the other hand, we don't want to create many temporary
-                // files
-                // for naught. If blocksize is smaller than half the free
-                // memory, grow it.
+        public static long estimateBestSizeOfBlocks(final long sizeoffile, final int maxtmpfiles, final long maxMemory) {
+                long blocksize = sizeoffile / maxtmpfiles + (sizeoffile % maxtmpfiles == 0 ? 0 : 1);
                 if (blocksize < maxMemory / 2) {
                         blocksize = maxMemory / 2;
                 }
@@ -114,34 +97,30 @@ public class ExternalSort {
         }
 
         /**
-         * @param args command line argument
-         * @throws IOException generic IO exception
+         * Main entry point for the external sorting program.
+         * @param args command line arguments
+         * @throws IOException if an I/O error occurs
          */
         public static void main(final String[] args) throws IOException {
-                boolean verbose = false;
-                boolean distinct = false;
-                int maxtmpfiles = DEFAULTMAXTEMPFILES;
-                Charset cs = Charset.defaultCharset();
-                String inputfile = null, outputfile = null;
-                File tempFileStore = null;
-                boolean usegzip = false;
-                boolean parallel = true;
-                int headersize = 0;
-                for (int param = 0; param < args.length; ++param) {
-                        if (args[param].equals("-v")
-                                || args[param].equals("--verbose")) {
-                                verbose = true;
-                        } else if ((args[param].equals("-h") || args[param]
-                                .equals("--help"))) {
-                                displayUsage();
-                                return;
-                        } else if ((args[param].equals("-d") || args[param]
-                                .equals("--distinct"))) {
-                                distinct = true;
-                        } else if ((args[param].equals("-t") || args[param]
-                                .equals("--maxtmpfiles"))
-                                && args.length > param + 1) {
-                                param++;
+        boolean verbose = false;
+        boolean distinct = false;
+        int maxtmpfiles = DEFAULTMAXTEMPFILES;
+        Charset cs = Charset.defaultCharset();
+        String inputfile = null, outputfile = null;
+        File tempFileStore = null;
+        boolean usegzip = false;
+        boolean parallel = true;
+        int headersize = 0;
+        for (int param = 0; param < args.length; ++param) {
+            if (args[param].equals("-v") || args[param].equals("--verbose")) {
+                verbose = true;
+            } else if ((args[param].equals("-h") || args[param].equals("--help"))) {
+                displayUsage();
+                return;
+            } else if ((args[param].equals("-d") || args[param].equals("--distinct"))) {
+                distinct = true;
+            } else if ((args[param].equals("-t") || args[param].equals("--maxtmpfiles")) && args.length > param + 1) {
+                param++;
                                 maxtmpfiles = Integer.parseInt(args[param]);
                                 if (maxtmpfiles < 0) {
                                         System.err

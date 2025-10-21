@@ -19,11 +19,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
+/**
+ * Utility class for performing external sorting on CSV files.
+ * Provides methods to sort large CSV files efficiently using external memory.
+ */
 public class CsvExternalSort {
 
 	private static final Logger LOG = Logger.getLogger(CsvExternalSort.class.getName());
@@ -70,8 +73,18 @@ public class CsvExternalSort {
 		return blocksize;
 	}
 
-	public static int mergeSortedFiles(BufferedWriter fbw, final CsvSortOptions sortOptions, List<CSVRecordBuffer> bfbs, List<CSVRecord> header)
-			throws IOException, ClassNotFoundException {
+    /**
+     * Merges multiple sorted CSVRecordBuffer objects into a single output file.
+     * @param fbw the BufferedWriter for output
+     * @param sortOptions sorting options
+     * @param bfbs list of CSVRecordBuffer objects
+     * @param header list of header records
+     * @return the number of records written
+     * @throws IOException if an I/O error occurs
+     * @throws ClassNotFoundException if a class cannot be found
+     */
+    public static int mergeSortedFiles(BufferedWriter fbw, final CsvSortOptions sortOptions, List<CSVRecordBuffer> bfbs, List<CSVRecord> header)
+	    throws IOException, ClassNotFoundException {
 		PriorityQueue<CSVRecordBuffer> pq = new PriorityQueue<CSVRecordBuffer>(11, new Comparator<CSVRecordBuffer>() {
 			@Override
 			public int compare(CSVRecordBuffer i, CSVRecordBuffer j) {
@@ -116,8 +129,19 @@ public class CsvExternalSort {
 		return numWrittenLines;
 	}
 
-	public static int mergeSortedFiles(List<File> files, File outputfile, final CsvSortOptions sortOptions,
-			boolean append, List<CSVRecord> header) throws IOException, ClassNotFoundException {
+    /**
+     * Merges multiple sorted CSV files into a single output file.
+     * @param files list of sorted files
+     * @param outputfile the output file
+     * @param sortOptions sorting options
+     * @param append whether to append to the output file
+     * @param header list of header records
+     * @return the number of records written
+     * @throws IOException if an I/O error occurs
+     * @throws ClassNotFoundException if a class cannot be found
+     */
+    public static int mergeSortedFiles(List<File> files, File outputfile, final CsvSortOptions sortOptions,
+	    boolean append, List<CSVRecord> header) throws IOException, ClassNotFoundException {
 
 		List<CSVRecordBuffer> bfbs = new ArrayList<CSVRecordBuffer>();
 		for (File f : files) {
@@ -141,8 +165,18 @@ public class CsvExternalSort {
 		return numWrittenLines;
 	}
 
-	public static List<File> sortInBatch(long size_in_byte, final BufferedReader fbr, final File tmpdirectory,
-			final CsvSortOptions sortOptions, List<CSVRecord> header) throws IOException {
+    /**
+     * Sorts records in batches and saves them to temporary files.
+     * @param size_in_byte the size of the batch in bytes
+     * @param fbr the BufferedReader for input
+     * @param tmpdirectory the directory for temporary files
+     * @param sortOptions sorting options
+     * @param header list of header records
+     * @return list of temporary files containing sorted batches
+     * @throws IOException if an I/O error occurs
+     */
+    public static List<File> sortInBatch(long size_in_byte, final BufferedReader fbr, final File tmpdirectory,
+	    final CsvSortOptions sortOptions, List<CSVRecord> header) throws IOException {
 
 		List<File> files = new ArrayList<File>();
 		long blocksize = estimateBestSizeOfBlocks(size_in_byte, sortOptions.getMaxTmpFiles(),
@@ -177,6 +211,14 @@ public class CsvExternalSort {
 		return files;
 	}
 
+	/**
+	 * Sorts a list of CSVRecord objects and saves them to a temporary file.
+	 * @param tmplist the list of CSVRecord objects to sort
+	 * @param tmpdirectory the directory for temporary files
+	 * @param sortOptions sorting options
+	 * @return the temporary file containing sorted records
+	 * @throws IOException if an I/O error occurs
+	 */
 	public static File sortAndSave(List<CSVRecord> tmplist, File tmpdirectory, final CsvSortOptions sortOptions) throws IOException {
 		Collections.sort(tmplist, sortOptions.getComparator());
 		File newtmpfile = File.createTempFile("sortInBatch", "flatfile", tmpdirectory);
@@ -211,8 +253,17 @@ public class CsvExternalSort {
 		return true;
 	}
 
-	public static List<File> sortInBatch(File file, File tmpdirectory, final CsvSortOptions sortOptions, List<CSVRecord> header)
-			throws IOException {
+    /**
+     * Sorts records from a file in batches and saves them to temporary files.
+     * @param file the input file
+     * @param tmpdirectory the directory for temporary files
+     * @param sortOptions sorting options
+     * @param header list of header records
+     * @return list of temporary files containing sorted batches
+     * @throws IOException if an I/O error occurs
+     */
+    public static List<File> sortInBatch(File file, File tmpdirectory, final CsvSortOptions sortOptions, List<CSVRecord> header)
+	    throws IOException {
 		try (BufferedReader fbr = new BufferedReader(
 				new InputStreamReader(new FileInputStream(file), sortOptions.getCharset()))) {
 			return sortInBatch(file.length(), fbr, tmpdirectory, sortOptions, header);
