@@ -52,6 +52,14 @@ jobs:
             MVN_ARGS="$MVN_ARGS -DreleaseVersion=${{ github.event.inputs.releaseVersion }}"
           fi
           mvn -B release:prepare $MVN_ARGS
+      - name: Check release.properties
+        run: |
+          if [ ! -f release.properties ]; then
+            echo "release.properties not found"
+            exit 1
+          fi
+          echo "Contents of release.properties:"
+          cat release.properties
 
       - name: Determine release version
         id: version
@@ -76,6 +84,6 @@ jobs:
           mvn -B release:perform -Darguments="-DskipTests -DaltDeploymentRepository=id::default::njord: -Dnjord.autoPublish=true -Dnjord.publishingType=automatic" -s .github/release-settings.xml
 
       - name: Create GitHub Release
-        run: gh release create "${{ steps.version.outputs.released_tag }}" --generate-notes --title "Version ${{ steps.version.outputs.released_version }}"
+        run: gh release create "${{ steps.version.outputs.released_tag }}" --generate-notes --title "${{ steps.version.outputs.released_version }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
