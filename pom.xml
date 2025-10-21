@@ -3,7 +3,7 @@
     <groupId>com.google.code.externalsortinginjava</groupId>
     <artifactId>externalsortinginjava</artifactId>
     <packaging>jar</packaging>
-    <version>0.6.4-SNAPSHOT</version>
+    <version>0.6.4</version>
     <name>externalsortinginjava</name>
     <url>http://github.com/lemire/externalsortinginjava/</url>
     <description>Sometimes, you want to sort large file without first loading them into memory. The solution is to use External Sorting. You divide the files into small blocks, sort each block in RAM, and then merge the result.
@@ -218,7 +218,7 @@
     <connection>scm:git:https://github.com/lemire/externalsortinginjava.git</connection>
     <url>scm:git:https://github.com/lemire/externalsortinginjava.git</url>
     <developerConnection>scm:git:https://github.com/lemire/externalsortinginjava.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>externalsortinginjava-0.6.4</tag>
     </scm>
 
   <distributionManagement>
