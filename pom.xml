@@ -16,16 +16,12 @@
         <java.target.version>1.8</java.target.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <njord.version>0.8.5</njord.version>
     </properties>
     <issueManagement>
         <system>GitHub Issue Tracking</system>
         <url>https://github.com/lemire/externalsortinginjava/issues</url>
     </issueManagement>
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>5</version>
-    </parent>
     <licenses>
         <license>
             <name>Public Domain</name>
@@ -41,19 +37,16 @@
                 <artifactId>junit</artifactId>
                 <version>4.13.1</version>
             </dependency>
-
 	        <dependency>
 	            <groupId>com.github.jbellis</groupId>
 	            <artifactId>jamm</artifactId>
 	            <version>0.3.1</version>
 	        </dependency>
-        
 			<dependency>
 			    <groupId>org.apache.commons</groupId>
 			    <artifactId>commons-csv</artifactId>
 			    <version>1.9.0</version>
 			</dependency>
-        
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -74,7 +67,14 @@
         </dependency>
     </dependencies>
     <build>
-        <plugins>
+            <extensions>
+                <extension>
+                    <groupId>eu.maveniverse.maven.njord</groupId>
+                    <artifactId>extension3</artifactId>
+                    <version>${njord.version}</version>
+                </extension>
+                </extensions>
+            <plugins>
 
             <plugin>
               <artifactId>maven-dependency-plugin</artifactId>
@@ -205,6 +205,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>eu.maveniverse.maven.plugins</groupId>
+                <artifactId>njord</artifactId>
+                <version>${njord.version}</version>
+            </plugin>
         </plugins>
     </build>
     <scm>
@@ -213,4 +218,17 @@
         <developerConnection>scm:git:git@github.com:lemire/externalsortinginjava.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>sonatype-central-portal</id>
+      <name>Sonatype Central Portal</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>sonatype-central-portal</id>
+      <name>Sonatype Central Portal</name>
+      <url>https://repo.maven.apache.org/maven2/</url>
+    </repository>
+  </distributionManagement>
 </project>
