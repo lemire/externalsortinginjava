@@ -3,7 +3,6 @@ Externalsortinginjava
 [![][maven img]][maven]
 [![][license img]][license]
 [![docs-badge][]][docs]
-![Java CI](https://github.com/lemire/externalsortinginjava/workflows/Java%20CI/badge.svg)
 
 External-Memory Sorting in Java: useful to sort very large files using multiple cores and an external-memory algorithm.
 
