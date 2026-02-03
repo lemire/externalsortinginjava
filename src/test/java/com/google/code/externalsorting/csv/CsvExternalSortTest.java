@@ -1,9 +1,7 @@
 package com.google.code.externalsorting.csv;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
-import org.junit.After;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,14 +11,19 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 public class CsvExternalSortTest {
@@ -258,6 +261,46 @@ public class CsvExternalSortTest {
 		assertNotEquals(firstLine, secondLine);
 
 		reader.close();
+	}
+
+	@Test
+	public void testStableSort() throws Exception {
+
+		/* GIEVN */
+		final String path = getClass().getClassLoader().getResource("test-file-3.csv").getPath();
+		File file = new File(path);
+
+		outputfile = new File("test-file-3-sorted.csv");
+
+		// Sort by 'author'
+		Comparator<CSVRecord> comparator = Comparator.comparing(r -> r.get(1));
+
+		CsvSortOptions sortOptions = new CsvSortOptions
+			// Keep the maxMemory small, so we split the every line into its own file
+			.Builder(comparator, CsvExternalSort.DEFAULTMAXTEMPFILES, 15)
+			.charset(StandardCharsets.UTF_8)
+			.distinct(false)
+			.numHeader(1)
+			.skipHeader(true)
+			.format(CSVFormat.DEFAULT)
+			.build();
+		ArrayList<CSVRecord> header = new ArrayList<>();
+
+		/* WHEN */
+		List<File> sortInBatch = CsvExternalSort.sortInBatch(file, null, sortOptions, header);
+		CsvExternalSort.mergeSortedFiles(sortInBatch, outputfile, sortOptions, true, header);
+
+		/* THEN */
+		List<String> lines = Files.readAllLines(Paths.get(outputfile.getPath()), StandardCharsets.UTF_8);
+
+		for(String a : lines) {
+			System.out.println(a);
+		}
+
+		List<Integer> indices = lines.stream()
+			.map(l -> Integer.valueOf(l.split(",")[0]))
+			.collect(Collectors.toList());
+		Assert.assertEquals(Arrays.asList(1, 2, 3, 4, 5), indices);
 	}
 
 	@After
