@@ -10,14 +10,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -85,15 +92,22 @@ public class CsvExternalSort {
      */
     public static int mergeSortedFiles(BufferedWriter fbw, final CsvSortOptions sortOptions, List<CSVRecordBuffer> bfbs, List<CSVRecord> header)
 	    throws IOException, ClassNotFoundException {
-		PriorityQueue<CSVRecordBuffer> pq = new PriorityQueue<CSVRecordBuffer>(11, new Comparator<CSVRecordBuffer>() {
-			@Override
-			public int compare(CSVRecordBuffer i, CSVRecordBuffer j) {
-				return sortOptions.getComparator().compare(i.peek(), j.peek());
-			}
-		});
-		for (CSVRecordBuffer bfb : bfbs)
-			if (!bfb.empty())
+
+		final Map<Integer, CSVRecordBuffer> indexedBfbs = new LinkedHashMap<>();
+		IntStream.range(0, bfbs.size())
+			.forEach(i -> indexedBfbs.put(i, bfbs.get(i)));
+
+		PriorityQueue<Map.Entry<Integer, CSVRecordBuffer>> pq = new PriorityQueue<>(11,
+			Comparator
+				.comparing((Function<Map.Entry<Integer, CSVRecordBuffer>, CSVRecord>) e -> e.getValue().peek(),
+					sortOptions.getComparator())
+				// Use the index of the sort file as final sort criterion, to keep the merge algorithm stable
+				.thenComparing(Map.Entry::getKey));
+
+		for (Map.Entry<Integer, CSVRecordBuffer> bfb : indexedBfbs.entrySet())
+			if (!bfb.getValue().empty())
 				pq.add(bfb);
+
 		int numWrittenLines = 0;
 		CSVPrinter printer = new CSVPrinter(fbw, sortOptions.getFormat());
 		if(! sortOptions.isSkipHeader()) {
@@ -103,9 +117,9 @@ public class CsvExternalSort {
 		}
 		CSVRecord lastLine = null;
 		try {
-			while (pq.size() > 0) {
-				CSVRecordBuffer bfb = pq.poll();
-				CSVRecord r = bfb.pop();
+			while (!pq.isEmpty()) {
+				Map.Entry<Integer, CSVRecordBuffer> bfb = pq.poll();
+				CSVRecord r = bfb.getValue().pop();
 				// Skip duplicate lines
 				if (sortOptions.isDistinct() && checkDuplicateLine(r, lastLine)) {
 				} else {
@@ -113,8 +127,8 @@ public class CsvExternalSort {
 					lastLine = r;
 					++numWrittenLines;
 				}
-				if (bfb.empty()) {
-					bfb.close();
+				if (bfb.getValue().empty()) {
+					bfb.getValue().close();
 				} else {
 					pq.add(bfb); // add it back
 				}
@@ -122,8 +136,8 @@ public class CsvExternalSort {
 		} finally {
 			printer.close();
 			fbw.close();
-			for (CSVRecordBuffer bfb : pq)
-				bfb.close();
+			for (Map.Entry<Integer, CSVRecordBuffer> bfb : pq)
+				bfb.getValue().close();
 		}
 
 		return numWrittenLines;
